@@ -1615,8 +1615,8 @@ function switchAuth(t) {
 }
 
 function doLogin() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const senha = document.getElementById('loginSenha').value;
+  const email = document.querySelector('#form-login input[type="email"]').value.trim();
+  const senha = document.querySelector('#form-login input[type="password"]').value;
   const errEl = document.getElementById('loginErr');
   const user = USERS[email];
   if (!user || user.senha !== senha) {
