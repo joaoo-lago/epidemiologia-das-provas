@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa da Prova — AMP-PR 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d1117;--surface:#13181f;--surface2:#1a2030;--surface3:#1f2840;--border:#252e40;--border2:#2e3a52;--text:#e8edf5;--muted:#5a6a88;--muted2:#7a8aaa;--accent:#4f9cf9;--accent-glow:rgba(79,156,249,0.12);--orange:#f97316;--purple:#a78bfa;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;display:flex;flex-direction:column;}
+
+header{flex-shrink:0;background:rgba(13,17,23,0.98);border-bottom:1px solid var(--border);padding:0 40px;height:58px;display:flex;align-items:center;justify-content:space-between;}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand-icon{width:32px;height:32px;border-radius:7px;background:linear-gradient(135deg,#4f9cf9,#7b6ef6);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11px;color:#fff;}
+.brand-name{font-family:'DM Serif Display',serif;font-size:19px;letter-spacing:-0.02em;}
+.brand-name em{color:var(--accent);font-style:italic;}
+.brand-sub{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;margin-top:1px;}
+.meta-pills{display:flex;gap:8px;}
+.pill{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;color:var(--muted2);border:1px solid var(--border2);padding:3px 9px;border-radius:20px;}
+
+.hero{flex-shrink:0;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
+.hstat{background:var(--bg);padding:14px 26px;}
+.hstat .num{font-family:'DM Serif Display',serif;font-size:26px;letter-spacing:-0.03em;color:var(--accent);line-height:1;}
+.hstat .lbl{font-size:11px;color:var(--muted);margin-top:2px;}
+
+.app{flex:1;display:grid;grid-template-columns:258px 1fr;min-height:0;overflow:hidden;}
+
+/* SIDEBAR */
+.sidebar{overflow-y:auto;background:var(--surface);border-right:1px solid var(--border);padding:20px 14px;display:flex;flex-direction:column;gap:20px;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+.sb-lbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:7px;}
+.fg label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted2);}
+select{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;appearance:none;width:100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%235a6a88' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;transition:border-color 0.15s;}
+select:focus{outline:none;border-color:var(--accent);}select:invalid{border-color:var(--border)!important;box-shadow:none!important;outline:none!important;}
+select:disabled{opacity:0.3;cursor:not-allowed;}select:required,select:invalid,select{border-color:var(--border)!important;box-shadow:none!important;}
+.reset-btn{background:transparent;border:1px solid var(--border2);color:var(--muted2);padding:7px;border-radius:6px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.08em;cursor:pointer;transition:all 0.15s;text-transform:uppercase;width:100%;}
+.reset-btn:hover{border-color:var(--orange);color:var(--orange);}
+
+.rank-list{display:flex;flex-direction:column;gap:4px;}
+.rank-item{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:5px;background:var(--surface2);cursor:pointer;transition:all 0.15s;border:1px solid transparent;font-size:11px;}
+.rank-item:hover{background:var(--surface3);border-color:var(--border2);}
+.rank-item.active{background:var(--surface3);border-color:var(--accent);}
+.rn{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);min-width:15px;}
+.rname{flex:1;color:var(--text);line-height:1.3;}
+.rcount{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);}
+
+.alert-desc{font-size:11px;color:var(--muted);line-height:1.5;padding:7px 9px;background:var(--surface2);border-radius:5px;border-left:2px solid var(--border2);margin-bottom:7px;}
+.alert-desc.hd{border-left-color:var(--orange);}
+.alert-desc.cd{border-left-color:#60a5fa;}
+.alerts{display:flex;flex-direction:column;gap:4px;}
+.alert-item{padding:7px 8px;border-radius:5px;border:1px solid;display:flex;align-items:flex-start;gap:6px;font-size:11px;line-height:1.4;cursor:pointer;transition:opacity 0.15s;}
+.alert-item:hover{opacity:0.75;}
+.alert-item.hot{background:rgba(249,115,22,0.07);border-color:rgba(249,115,22,0.2);}
+.alert-item.cold{background:rgba(96,165,250,0.05);border-color:rgba(96,165,250,0.15);}
+.aicon{font-size:11px;margin-top:1px;flex-shrink:0;}
+.atema{color:var(--text);font-weight:500;}
+.adesc{color:var(--muted);font-size:10px;margin-top:1px;}
+
+.ano-btn{font-family:'DM Mono',monospace;font-size:9px;padding:3px 7px;border-radius:3px;border:1px solid var(--border2);background:transparent;color:var(--muted2);cursor:pointer;transition:all 0.12s;}
+.ano-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.sb-empty{font-size:11px;color:var(--muted);}
+
+/* CONTENT */
+.content{overflow-y:auto;padding:28px 32px;display:flex;flex-direction:column;gap:20px;}
+.content::-webkit-scrollbar{width:5px;}
+.content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+.tabs{display:flex;gap:3px;background:var(--surface);border:1px solid var(--border);padding:3px;border-radius:7px;width:fit-content;}
+.tab-btn{padding:6px 15px;border-radius:5px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--muted);background:transparent;transition:all 0.15s;}
+.tab-btn.active{background:var(--surface2);color:var(--text);}
+
+.panel{display:none;flex-direction:column;gap:20px;}
+.panel.active{display:flex;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.card-head{padding:16px 20px 0;display:flex;justify-content:space-between;align-items:flex-start;}
+.card-title{font-family:'DM Serif Display',serif;font-size:16px;letter-spacing:-0.01em;}
+.card-desc{font-size:11px;color:var(--muted);margin-top:2px;}
+.sort-btn{background:var(--surface2);border:1px solid var(--border2);color:var(--muted2);padding:4px 9px;border-radius:5px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.08em;cursor:pointer;transition:all 0.15s;text-transform:uppercase;white-space:nowrap;}
+.sort-btn:hover{border-color:var(--accent);color:var(--accent);}
+.sort-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-glow);}
+.badge{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);background:var(--accent-glow);border:1px solid rgba(79,156,249,0.2);padding:4px 10px;border-radius:20px;white-space:nowrap;flex-shrink:0;}
+.card-body{padding:16px 20px 20px;}
+canvas{width:100% !important;}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:44px 20px;gap:8px;color:var(--muted);}
+.empty-icon{font-size:28px;opacity:0.3;}
+.empty-text{font-size:12px;text-align:center;}
+
+/* QUESTÕES */
+.q-head{padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);}
+.q-title{font-family:'DM Serif Display',serif;font-size:16px;}
+.q-body{padding:12px 20px;max-height:420px;overflow-y:auto;}
+.q-body::-webkit-scrollbar{width:3px;}
+.q-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+.q-list{display:flex;flex-direction:column;gap:5px;}
+.q-row{display:grid;grid-template-columns:88px 1fr;gap:10px;align-items:start;padding:8px 10px;border-radius:5px;background:var(--surface2);border:1px solid var(--border);}
+.q-id{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);font-weight:500;padding-top:1px;}
+.q-assunto{font-size:12px;color:var(--text);line-height:1.4;}
+.q-sub{font-size:10px;color:var(--muted);margin-top:2px;}
+.q-empty{color:var(--muted);font-size:12px;padding:24px 0;text-align:center;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-icon">MP</div>
+    <div>
+      <div class="brand-name">Mapa da <em>Prova</em></div>
+      <div class="brand-sub">AMP-PR · Análise Epidemiológica</div>
+    </div>
+  </div>
+  <div class="meta-pills">
+    <div class="pill">2026</div>
+    <div class="pill">100 questões</div>
+    <div class="pill">5 áreas</div>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hstat"><div class="num">100</div><div class="lbl">questões analisadas</div></div>
+  <div class="hstat"><div class="num">1</div><div class="lbl">ano de prova (2026)</div></div>
+  <div class="hstat"><div class="num">5</div><div class="lbl">grandes áreas</div></div>
+  <div class="hstat"><div class="num" id="heroNum">—</div><div class="lbl" id="heroLbl">tema mais cobrado</div></div>
+</div>
+
+<div class="app">
+  <aside class="sidebar">
+    <div>
+      <div class="sb-lbl">Filtros</div>
+      <div class="fg"><label>Grande Área</label>
+        <select id="selArea" onchange="onArea()" required="false"><option value="">Selecione a área</option></select></div>
+      <div class="fg"><label>Tema Principal</label>
+        <select id="selTema" onchange="onTema()" disabled><option value="">Selecione o tema</option></select></div>
+      <div class="fg"><label>Subtema</label>
+        <select id="selSub" onchange="onSub()" disabled><option value="">Todos os subtemas</option></select></div>
+      <div class="fg"><label>Filtrar por ano</label>
+        <div id="anosBtns" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px"></div>
+        <button class="reset-btn" onclick="resetAnos()" style="margin-top:5px;font-size:9px;padding:4px">Todos os anos</button>
+      </div>
+      <button class="reset-btn" onclick="reset()">↺ Resetar filtros</button>
+    </div>
+
+    <div>
+      <div class="sb-lbl">Ranking de temas</div>
+      <div class="rank-list" id="rankList"><div class="sb-empty">Selecione uma área.</div></div>
+    </div>
+
+    <div>
+      <div class="sb-lbl">🔥 Temas quentes</div>
+      <div class="alert-desc hd">Temas cuja cobrança nas <strong>últimas 3 provas</strong> está acima da média histórica. Priorize estes na revisão.</div>
+      <div class="alerts" id="alertsHot"><div style="padding:10px;background:rgba(249,115,22,0.07);border:1px solid rgba(249,115,22,0.2);border-radius:5px;font-size:12px;color:#7a8aaa;text-align:center;line-height:1.6">🔒 Disponível no <strong style="color:#e8edf5">Plano Essencial</strong></div></div>
+    </div>
+
+    <div>
+      <div class="sb-lbl">🧊 Temas frios</div>
+      <div class="alert-desc cd">Temas que <strong>estão sendo menos cobrados</strong> nas últimas provas em relação ao histórico. Podem ser depriorizados.</div>
+      <div class="alerts" id="alertsCold"><div style="padding:10px;background:rgba(96,165,250,0.05);border:1px solid rgba(96,165,250,0.15);border-radius:5px;font-size:12px;color:#7a8aaa;text-align:center;line-height:1.6">🔒 Disponível no <strong style="color:#e8edf5">Plano Essencial</strong></div></div>
+    </div>
+  </aside>
+
+  <div class="content">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="tab('geral')">Visão Geral</button>
+            <button class="tab-btn" onclick="tab('questoes')">Questões</button>
+    </div>
+
+    <!-- GERAL -->
+    <div class="panel active" id="panel-geral">
+      <div class="card">
+        <div class="card-head">
+          <div><div class="card-title">Temas Principais por Frequência</div><div class="card-desc">Total de questões por tema (2026) — clique para ver os subtemas</div></div>
+          <div class="badge" id="b-temas">Selecione uma área</div>
+        </div>
+        <div class="card-body">
+          <div id="e-temas" class="empty"><div class="empty-icon">📊</div><div class="empty-text">Selecione uma Grande Área no filtro</div></div>
+          <canvas id="c-temas" style="display:none"></canvas>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head">
+            <div><div class="card-title">Evolução da Área</div><div class="card-desc">Questões em 2026</div></div>
+            <div class="badge" id="b-arealine">—</div>
+          </div>
+          <div class="card-body">
+            <div id="e-arealine" style="display:flex"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px 20px;gap:10px"><div style="font-size:28px">🔒</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#4f9cf9">Recurso Essencial</div><div style="font-size:13px;color:#7a8aaa;text-align:center;line-height:1.6">Disponível no <strong style="color:#e8edf5">Plano Essencial</strong></div></div></div>
+            <canvas id="c-arealine" style="display:none"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div><div class="card-title">Top 5 · Últimas 3 Provas</div><div class="card-desc">Mais cobrados em 2026</div></div>
+          </div>
+          <div class="card-body">
+            <div id="e-top5" style="display:flex"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px 20px;gap:10px"><div style="font-size:28px">🔒</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#4f9cf9">Recurso Essencial</div><div style="font-size:13px;color:#7a8aaa;text-align:center;line-height:1.6">Disponível no <strong style="color:#e8edf5">Plano Essencial</strong></div></div></div>
+            <canvas id="c-top5" style="display:none"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+
+      <!-- Subtemas - aparece ao selecionar tema -->
+      <div class="card" id="card-subbar" style="display:none">
+        <div class="card-head">
+          <div><div class="card-title">Frequência por Subtema</div><div class="card-desc">Total em 2026 — clique para filtrar</div></div>
+          <div class="badge" id="b-subbar">Selecione um tema</div>
+        </div>
+        <div class="card-body">
+          <div id="e-subbar" class="empty"><div class="empty-icon">🔬</div><div class="empty-text">Selecione Área e Tema no filtro</div></div>
+          <canvas id="c-subbar" style="display:none"></canvas>
+        </div>
+      </div>
+
+    <!-- QUESTÕES -->
+    <div class="panel" id="panel-questoes">
+      <div class="card">
+        <div class="q-head">
+          <div class="q-title">Questões Cobradas</div>
+          <div class="badge" id="b-qtd">Selecione um tema</div>
+        </div>
+        <div class="q-body">
+          <div id="qList" class="q-list">
+            <div class="q-empty">Selecione uma Área e Tema no filtro para listar as questões.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const AMP_DATA={"hierarchy":{"Pediatria":{"Infectologia Pediátrica":["Adenite Cervical Bacteriana","Celulite Orbitária","Conjuntivite Infecciosa","Coqueluche (Síndrome Coqueluchoide)","Encefalite Viral","Faringotonsilites","Febre Reumática","Febre de Origem Indeterminada","Hepatite A","Herpangina","Infecção pelo HIV na Infância","Infecções Bacterianas","Infecções de Pele e Partes Moles","Leptospirose (Síndrome de Weil)","Mastoidite Aguda","Meningite","Mononucleose Infecciosa","Osteomielite Aguda","Otite Média Aguda","Raiva Humana","Resistência Antimicrobiana","Sinusite Bacteriana Aguda","Sífilis Congênita","Síndrome do Choque Tóxico","Tuberculose"],"Neonatologia":["Afecções Respiratórias do RN","Cardiopatias Congênitas","Conjuntivite Neonatal","Convulsão Neonatal","Encefalopatia Hipóxico-Isquêmica","Gestação Gemelar","Hérnia Diafragmática Congênita","Icterícia Neonatal","Reanimação Neonatal","Síndrome de Aspiração Meconial"],"Nefrologia Pediátrica":["Infecção do Trato Urinário","Litíase Renal na Infância","Síndrome Nefrótica"],"Cirurgia Pediátrica":["Apendicite Aguda","Divertículo de Meckel","Doença de Hirschsprung","Escroto Agudo","Estenose Hipertrófica do Piloro","Hérnia Inguinal","Intussuscepção Intestinal","Massas Cervicais Congênitas"],"Endocrinologia Pediátrica":["Baixa Estatura","Cetoacidose Diabética (CAD)","Insuficiência Adrenal"],"Neurologia Pediátrica":["Acidente Vascular Cerebral na Criança","Crise Convulsiva Febril","Encefalite Autoimune","Encefalomielite Disseminada Aguda (ADEM)","Estado de Mal Epiléptico","Hipertensão Intracraniana Idiopática","Meningoencefalite Viral","Síndrome de Guillain-Barré","Síndromes Neurocutâneas"],"Cardiologia Pediátrica":["Cardiopatias Congênitas","Miocardite","Miocardite Viral"],"Pneumologia Pediátrica":["Asma","Bronquiolite Viral Aguda","Fibrose Cística","Laringite Estridulosa (Crupe)","Pneumonia Adquirida na Comunidade","Pneumonia Complicada","Pneumonite de Hipersensibilidade"],"Trauma Pediátrico":["Queimaduras na Infância","Trauma Abdominal Fechado","Traumatismo Cranioencefálico"],"Puericultura":["Aleitamento Materno","Cólica do Lactente","Desenvolvimento Neuropsicomotor","Higiene do Sono","Marcos do Desenvolvimento","Prevenção de Acidentes","Violência e Maus-Tratos na Infância"],"Ética e Legislação":["Atendimento a Menores","Atestado de Óbito","Proteção à Criança e ao Adolescente","Responsabilidade Médica"],"Toxicologia Pediátrica":["Ingestão de Substâncias Cáusticas","Intoxicações Exógenas"],"Nutrição Infantil":["Aleitamento Materno"],"Dermatologia Pediátrica":["Dermatite Seborreica","Erupção Variceliforme de Kaposi","Tinea Capitis (Querion de Celso)"],"Emergência Pediátrica":["Choque Séptico","Ingestão de Corpo Estranho","Parada Cardiorrespiratória (PCR)"],"Alergia e Imunologia Pediátrica":["Alergia Alimentar","Anafilaxia","Farmacodermias","Imunodeficiências Primárias"],"Gastroenterologia Pediátrica":["Diarreia Aguda e Crônica","Fibrose Cística","Prolapso Retal"],"Ortopedia Pediátrica":["Epifisiólise Femoral Proximal"],"Reumatologia Pediátrica":["Doença de Kawasaki","Lúpus Eritematoso Sistêmico (LES)","Púrpura de Henoch-Schönlein"],"Cuidados Paliativos Pediátricos":["Condutas de Fim de Vida","Controle de Sintomas","Manejo da Dor Aguda Severa","Princípios Gerais"],"Psiquiatria Infantil":["TDAH","Transtorno do Espectro Autista (TEA)"],"Hematologia Pediátrica":["Distúrbios da Coagulação","Neutropenia Febril","Púrpura Trombocitopênica Imune (PTI)"],"Oncologia Pediátrica":["Tumores Ovarianos na Infância","Tumores Ósseos"],"Genética Pediátrica":["Síndrome de Down"],"Medicina Intensiva Pediátrica":["Choque Pediátrico"]},"Ginecologia e Obstetrícia":{"Patologias da Gestação":["Cardiopatias na Gestação","Diabetes Gestacional","Doenças Neurológicas na Gestação","Doenças Tireoidianas na Gravidez","Hiperêmese Gravídica","Infecção do Trato Urinário (ITU)","Infecções Congênitas","Isoimunização Materno-Fetal","Parvovirose","Síndromes Hipertensivas da Gestação"],"Pré-Natal e Fisiologia":["Avaliação da Vitalidade Fetal","Farmacologia Obstétrica","Fisiologia Fetal e Placentária","Gestação Gemelar","Imunização na Gestação","Rotina e Rastreamento Pré-Natal","Ultrassonografia e Líquido Amniótico"],"Parto e Puerpério":["Assistência ao Parto","Distócias do Trabalho de Parto","Estática Fetal","Fórcipes","Hemorragia Pós-Parto (HPP)","Operação Cesariana","Puerpério","Rotura Prematura de Membranas (RPMO)","Trabalho de Parto","Trabalho de Parto Prematuro"],"Sangramentos (1ª e 2ª Metade)":["Abortamento","Acretismo Placentário","Descolamento Prematuro de Placenta (DPP)","Doença Trofoblástica Gestacional","Gravidez Ectópica","Placenta Prévia"],"Endócrina e Anticoncepção":["Amenorreia","Anticoncepção","Climatério e Menopausa","Dismenorreia","Ginecologia Endócrina","Sangramento Uterino Anormal","Síndrome dos Ovários Policísticos (SOP)"],"Uroginecologia":["Síndrome da Bexiga Hiperativa","Tratamento de Incontinências"],"Saúde da Mulher e Epidemiologia":["Bioética","Epidemiologia","Ginecologia Preventiva","Saúde da Criança","Saúde da Mulher","Sexologia","Ética e Legislação"],"Mastologia":["BI-RADS","Broto Mamário","Derrame Papilar","Diagnóstico de CA de mama","Estadiamento","Mutações","Tratamento de CA de mama"],"Oncologia":["Câncer de Colo de Útero","Câncer de Ovário","Padrão de Crescimento Gompertziano"],"Infecções e Doenças Benignas":["Doença Inflamatória Pélvica (DIP)","Doença Tubária","Dor Pélvica","Endometriose","Hiperplasia Endometrial","IST","Leiomiomatose Uterina","Massas Anexiais Benignas","Vulvovaginites"]},"Clínica Médica":{"Reumatologia":["Artrite Reativa","Artrite Reumatoide","Dermatomiosite","Doenças Osteoarticulares","Esclerose Sistêmica (Esclerodermia)","Febre Reumática","Fibromialgia","Lúpus Eritematoso Sistêmico na Gestação","Miopatias","Osteoartrite (Artrose)","Síndrome do Anticorpo Antifosfolipídeo (SAF)"],"Endocrinologia":["Diabetes Mellitus Tipo 1","Diabetes Mellitus Tipo 2","Dislipidemias","Feocromocitoma","Hipercalcemia","Hipertireoidismo","Hipoglicemia","Hipotireoidismo","Nódulo de Tireoide","Obesidade","Osteoporose","Reposição Androgênica na Menopausa","Síndrome Metabólica","Síndrome de Cushing"],"Cardiologia":["Anti-hipertensivos","Avaliação Pré-Operatória","Dislipidemia no Diabetes","Dislipidemias","Doença Arterial Coronariana","Doença Arterial Obstrutiva Periférica","Doença de Chagas","Doenças do Pericárdio","Eletrocardiograma (ECG)","Endocardite Infecciosa","Estenose Aórtica","Fibrilação Atrial","Hipertensão Arterial Sistêmica","Infarto Agudo do Miocárdio (IAM)","Insuficiência Aórtica","Insuficiência Cardíaca","Miocardite","Prolapso da Valva Mitral","Risco Cardiovascular em Atletas","Semiologia Cardiovascular","Síncope","Síndrome de Takotsubo","Valvopatias"],"Nefrologia":["Doença Renal Crônica (DRC)","Insuficiência Renal Aguda","Litíase Renal","Nefropatia Diabética","Terapia de Substituição Renal"],"Neurologia":["Acidente Vascular Cerebral Isquêmico","Anatomia da Dor","Cefaleias","Doença de Parkinson","Esclerose Múltipla","Meningite por Doença de Lyme","Paralisia de Nervos Cranianos","Respiração de Cheyne-Stokes","Síndrome de Guillain-Barré","heminegligência espacial"],"Infectologia":["Doença de Chagas","Espondilodiscite","Febre de Origem Obscura (FOO)","Herpes Zoster","Infecção pelo HIV e Doenças Oportunistas","Infecções em Imunodeprimidos","Leptospirose","Neurotoxoplasmose","Sífilis Primária"],"Dermatologia":["Celulite / Erisipela","Câncer de Pele Não Melanoma","Erisipela","Lesões Elementares da Pele"],"Hematologia":["Anemia Aguda","Anemia Ferropriva","Anemia na Doença Renal Crônica","Anemias Hemolíticas","Hemoterapia","Leucemia Aguda","Leucemia Linfocítica Crônica (LLC)","Neoplasias Mieloproliferativas","Plaquetopenia","Preparo Pré-Operatório e Anticoagulação"],"Oncologia":["Síndromes Paraneoplásicas","Urgências Oncológicas"],"Pneumologia":["Asma","Bronquiectasias","Cor Pulmonale","Derrame Pleural","Distúrbios Respiratórios do Sono","Doença Pulmonar Obstrutiva Crônica (DPOC)","Espirometria","Hemoptise","Insuficiência Respiratória Crônica","Pneumoconiose (Silicose)","Pneumonia Adquirida na Comunidade","Rastreamento Populacional","Tosse Crônica","Tromboembolismo Pulmonar","Tuberculose"],"Medicina Intensiva":["Choque e Hemodinâmica","Pneumonia Associada à Ventilação Mecânica (PAV)","Sepse e Choque Séptico","Síndrome do Desconforto Respiratório Agudo"],"Cuidados Paliativos":["Adequação de Esforço Terapêutico","Controle de Sintomas no Fim de Vida"],"Gastroenterologia":["Cirrose Hepática","Colangite Biliar Primária","Colestase","Diarreia Crônica","Disfagia","Doença Diverticular dos Cólons","Doença do Refluxo Gastroesofágico","Fisiologia Digestiva","Hemorragia Digestiva Alta (HDA)","Linfoma Intestinal","Síndrome do Intestino Irritável","Transtornos Funcionais e Motores"],"Psiquiatria":["Transtorno Obsessivo Compulsivo"],"Urologia":["Nefrolitíase"],"Alergia e Imunologia":["Anafilaxia"],"Medicina Baseada em Evidências":["Raciocínio Clínico"],"Farmacologia Clínica":["Metabolismo de Fármacos"],"Epidemiologia Clínica":["Ensaios Clínicos"],"Doenças Infecciosas":["Doença da Arranhadura do Gato"]},"Cirurgia Geral":{"Cuidados Pós-Operatórios":["Abcesso Residual","Analgesia Pós-Operatória","Coagulopatias","Febre Pós-Operatória","Infecção de Sítio Cirúrgico","Insuficiência Renal Aguda","Nutrição Cirúrgica","Síndrome Compartimental Abdominal","Transfusão Sanguínea","Trombose Venosa Profunda","Íleo Adinâmico / Paralítico"],"Medicina Intensiva":["Cuidados em Pacientes Queimados","Paciente Crítico","Sepse e Choque","Via Aérea Avançada"],"Dermatologia":["Melanoma Cutâneo"],"Bioética":["Autonomia e Diretivas Antecipadas","Consentimento Informado","Cuidados Paliativos","Diretivas Antecipadas de Vontade","Prontuário Médico","Relação Médico-Paciente"],"Urologia":["Câncer de Próstata","Câncer de Testículo","Nefrolitíase (Cólica Nefrética)","Torção Testicular","Tumores Renais"],"Cirurgia Hepatobiliar":["Anatomia Biliar","Avaliação de Função Hepática","Cistos de Colédoco","Colecistite","Colecistite Aguda Alitiásica","Coledocolitíase","Colelitíase","Hemobilia","Icterícia Obstrutiva","Icterícia Pós-Operatória","Pólipos Vesiculares","Síndromes Colestáticas","Tumores Benignos do Fígado","Íleo Biliar"],"Oncologia Cirúrgica":["Cistos Pancreáticos","Câncer Colorretal","Câncer Gástrico","Câncer de Esôfago","Marcadores Tumorais"],"Cirurgia do Aparelho Digestivo":["Abdome Agudo Inflamatório","Abdome Agudo Perfurativo","Colite Pseudomembranosa","Doença Diverticular","Fisiologia da Dor Abdominal","Pancreatite Aguda","Polipose Adenomatosa Familiar (PAF)","Pólipos Colorretais"],"Queimaduras":["Grande Queimado","Queimaduras Térmicas"],"Parede Abdominal":["Hérnias Inguinais","Hérnias da Parede Abdominal"],"Gastroenterologia":["Anatomia e Fisiologia Esofágica","Anel de Schatzki","Divertículos Esofágicos","Doença Ulcerosa Péptica","Doença do Refluxo Gastroesofágico","Fisiologia Esofágica","Fisiologia Intestinal","Hemorragia Digestiva Alta","Hemorragia Digestiva Baixa","Hérnias Hiatais","Síndrome do Intestino Irritável"],"Cirurgia do Trauma":["Choque Hemorrágico","E-FAST","Epidemiologia do Trauma","Manejo de Via Aérea","Trauma Abdominal","Trauma Cranioencefálico","Trauma Torácico","Trauma Vascular de Extremidade"],"Cirurgia Vascular":["Aneurisma de Aorta Abdominal","Doença Arterial Carotídea","Doença Arterial Obstrutiva Periférica","Doença Venosa Crônica","Trombose Venosa Profunda"],"Cirurgia Plástica":["Cicatrização de Feridas","Fissura Labiopalatina","Infecção de Sítio Cirúrgico (Mediastinite)","Lesão por Pressão","Queimaduras","Reconstrução Mamária","Retalhos Cutâneos"],"Cuidados Pré-Operatórios":["Abdome Agudo","Jejum","Obesidade"],"Cirurgia Torácica":["Câncer de Pulmão","Derrame Pleural","Pneumotórax Espontâneo Secundário"],"Cirurgia Bariátrica":["Bypass Gástrico em Y de Roux","Fisiologia do Apetite","Indicações de Cirurgia Metabólica"],"Coloproctologia":["Abscesso Anorretal","Doença Hemorroidária","Doenças Orificiais (HPV)","Fissura Anal Aguda","Retocolite Ulcerativa (RCU)"],"Cirurgia Cardiovascular":["Complicações do Infarto Agudo do Miocárdio","Síndrome Aórtica Aguda","Vasos Coronarianos"],"Infecções Cirúrgicas":["Infecções de Partes Moles"],"Mastologia":["BI-RADS","Derrame Papilar","Linfonodos Mamários"]},"Medicina Preventiva / Saúde Coletiva":{"História das Políticas de Saúde no Brasil":["Conferências de Saúde","Ditadura Militar","Ensino Médico","Era Previdenciária","Modelos de Saúde","Período de Transição","Reforma Sanitária","República Velha"],"Perfis e Indicadores Demográficos":["Determinantes Sociais da Saúde","Nutrição e Sociedade"],"Atenção Primária à Saúde":["Condições Agudas e Queixas Comuns","Condições Crônicas e Risco Cardiovascular","Fundamentos e Atributos da APS","Infecciosas e ISTs na APS","Método Clínico Centrado na Pessoa (MCCP)","Promoção da Saúde e Rastreamento","Saúde Mental e Dependência Química","Saúde da Criança e Aleitamento","Saúde da Mulher na APS","Saúde do Idoso e Polifarmácia"],"A Evolução do SUS":["Financiamento e Economia da Saúde","Leis Orgânicas da Saúde (8.080/90)","Participação e Controle Social (Lei 8.142)","Princípios do SUS","Redes, Pactos e Políticas Públicas","Reforma Sanitária e CF/88"],"Ética médica, Bioética e Documentação":["Declaração de Óbito","Vacinação e Equidade"],"Estudos Epidemiológicos (Classificação)":["Coleta de Dados em Pesquisa","Desenhos de Estudo","Medidas de Frequência de Doenças","Níveis de Evidência","Tipos de Estudos Epidemiológicos"],"Níveis de Prevenção":["Conceitos Gerais de Prevenção","Prevenção Primária","Prevenção Quaternária","Prevenção Secundária","Prevenção Terciária"],"Estatística de Testes Diagnósticos":["Interpretação Clínica de Exames","Medidas de Impacto","Validade de Testes","Valores Preditivos"],"Estudos Epidemiológicos (Análise Estatística e Aplicação)":["Análise de Artigos","Desfechos Clínicos","Escore de Risco / Validade Externa","Leitura Crítica de Artigos Científicos","Medicina Baseada em Evidências","Medidas de Associação","Medidas de Associação e Impacto","Número Necessário para Tratar (NNT)","Princípios da MBE","Risco e Associação"],"Epidemias, Endemias e Pandemias":["Infecção pelo HIV","Tuberculose"],"Indicadores de Morbimortalidade":["Incidência e Prevalência","Indicadores de Saúde","Indicadores em Saúde","Sistemas de Informação"],"Notificação":["Notificação Compulsória","Vigilância Epidemiológica"],"Políticas de Saúde Mental / SUS":["Saúde Mental"]}},"years":["2026"],"timeSeries":{"Pediatria|||Infectologia Pediátrica":{"2026":1},"Pediatria|||Neonatologia":{"2026":2},"Pediatria|||Nefrologia Pediátrica":{"2026":1},"Pediatria|||Cirurgia Pediátrica":{"2026":2},"Pediatria|||Endocrinologia Pediátrica":{"2026":2},"Pediatria|||Neurologia Pediátrica":{"2026":2},"Pediatria|||Cardiologia Pediátrica":{"2026":1},"Pediatria|||Pneumologia Pediátrica":{"2026":1},"Pediatria|||Trauma Pediátrico":{"2026":1},"Pediatria|||Puericultura":{"2026":1},"Pediatria|||Ética e Legislação":{"2026":1},"Pediatria|||Toxicologia Pediátrica":{"2026":1},"Pediatria|||Nutrição Infantil":{"2026":1},"Pediatria|||Dermatologia Pediátrica":{"2026":1},"Pediatria|||Emergência Pediátrica":{"2026":1},"Pediatria|||Alergia e Imunologia Pediátrica":{"2026":1},"Ginecologia e Obstetrícia|||Patologias da Gestação":{"2026":4},"Ginecologia e Obstetrícia|||Pré-Natal e Fisiologia":{"2026":2},"Ginecologia e Obstetrícia|||Parto e Puerpério":{"2026":5},"Ginecologia e Obstetrícia|||Sangramentos (1ª e 2ª Metade)":{"2026":1},"Ginecologia e Obstetrícia|||Endócrina e Anticoncepção":{"2026":3},"Ginecologia e Obstetrícia|||Uroginecologia":{"2026":1},"Ginecologia e Obstetrícia|||Saúde da Mulher e Epidemiologia":{"2026":1},"Ginecologia e Obstetrícia|||Mastologia":{"2026":1},"Ginecologia e Obstetrícia|||Oncologia":{"2026":1},"Ginecologia e Obstetrícia|||Infecções e Doenças Benignas":{"2026":1},"Clínica Médica|||Reumatologia":{"2026":1},"Clínica Médica|||Endocrinologia":{"2026":2},"Clínica Médica|||Cardiologia":{"2026":4},"Clínica Médica|||Nefrologia":{"2026":1},"Clínica Médica|||Neurologia":{"2026":1},"Clínica Médica|||Infectologia":{"2026":2},"Clínica Médica|||Dermatologia":{"2026":1},"Clínica Médica|||Hematologia":{"2026":2},"Clínica Médica|||Oncologia":{"2026":2},"Clínica Médica|||Pneumologia":{"2026":2},"Clínica Médica|||Medicina Intensiva":{"2026":2},"Cirurgia Geral|||Cuidados Pós-Operatórios":{"2026":3},"Cirurgia Geral|||Medicina Intensiva":{"2026":2},"Cirurgia Geral|||Dermatologia":{"2026":1},"Cirurgia Geral|||Bioética":{"2026":1},"Cirurgia Geral|||Urologia":{"2026":1},"Cirurgia Geral|||Cirurgia Hepatobiliar":{"2026":2},"Cirurgia Geral|||Oncologia Cirúrgica":{"2026":1},"Cirurgia Geral|||Cirurgia do Aparelho Digestivo":{"2026":1},"Cirurgia Geral|||Queimaduras":{"2026":1},"Cirurgia Geral|||Parede Abdominal":{"2026":1},"Cirurgia Geral|||Gastroenterologia":{"2026":1},"Cirurgia Geral|||Cirurgia do Trauma":{"2026":5},"Medicina Preventiva / Saúde Coletiva|||História das Políticas de Saúde no Brasil":{"2026":1},"Medicina Preventiva / Saúde Coletiva|||Perfis e Indicadores Demográficos":{"2026":1},"Medicina Preventiva / Saúde Coletiva|||Atenção Primária à Saúde":{"2026":8},"Medicina Preventiva / Saúde Coletiva|||A Evolução do SUS":{"2026":1},"Medicina Preventiva / Saúde Coletiva|||Ética médica, Bioética e Documentação":{"2026":1},"Medicina Preventiva / Saúde Coletiva|||Estudos Epidemiológicos (Classificação)":{"2026":2},"Medicina Preventiva / Saúde Coletiva|||Níveis de Prevenção":{"2026":2},"Medicina Preventiva / Saúde Coletiva|||Estatística de Testes Diagnósticos":{"2026":2},"Medicina Preventiva / Saúde Coletiva|||Estudos Epidemiológicos (Análise Estatística e Aplicação)":{"2026":2},"Pediatria|||Gastroenterologia Pediátrica":{"2026":0},"Pediatria|||Ortopedia Pediátrica":{"2026":0},"Pediatria|||Reumatologia Pediátrica":{"2026":0},"Pediatria|||Cuidados Paliativos Pediátricos":{"2026":0},"Medicina Preventiva / Saúde Coletiva|||Epidemias, Endemias e Pandemias":{"2026":0},"Medicina Preventiva / Saúde Coletiva|||Indicadores de Morbimortalidade":{"2026":0},"Medicina Preventiva / Saúde Coletiva|||Notificação":{"2026":0},"Clínica Médica|||Cuidados Paliativos":{"2026":0},"Clínica Médica|||Gastroenterologia":{"2026":0},"Cirurgia Geral|||Cirurgia Vascular":{"2026":0},"Cirurgia Geral|||Cirurgia Plástica":{"2026":0},"Cirurgia Geral|||Cuidados Pré-Operatórios":{"2026":0},"Pediatria|||Psiquiatria Infantil":{"2026":0},"Pediatria|||Hematologia Pediátrica":{"2026":0},"Cirurgia Geral|||Cirurgia Torácica":{"2026":0},"Cirurgia Geral|||Cirurgia Bariátrica":{"2026":0},"Clínica Médica|||Psiquiatria":{"2026":0},"Clínica Médica|||Urologia":{"2026":0},"Cirurgia Geral|||Coloproctologia":{"2026":0},"Clínica Médica|||Alergia e Imunologia":{"2026":0},"Cirurgia Geral|||Cirurgia Cardiovascular":{"2026":0},"Pediatria|||Oncologia Pediátrica":{"2026":0},"Cirurgia Geral|||Infecções Cirúrgicas":{"2026":0},"Clínica Médica|||Medicina Baseada em Evidências":{"2026":0},"Pediatria|||Genética Pediátrica":{"2026":0},"Medicina Preventiva / Saúde Coletiva|||Políticas de Saúde Mental / SUS":{"2026":0},"Cirurgia Geral|||Mastologia":{"2026":0},"Clínica Médica|||Farmacologia Clínica":{"2026":0},"Clínica Médica|||Epidemiologia Clínica":{"2026":0},"Clínica Médica|||Doenças Infecciosas":{"2026":0},"Pediatria|||Medicina Intensiva Pediátrica":{"2026":0}},"subtemaSeries":{"Conjuntivite Infecciosa":{"2026":1},"Hérnia Diafragmática Congênita":{"2026":1},"Síndrome Nefrótica":{"2026":1},"Intussuscepção Intestinal":{"2026":1},"Cetoacidose Diabética (CAD)":{"2026":1},"Baixa Estatura":{"2026":1},"Síndromes Neurocutâneas":{"2026":1},"Cardiopatias Congênitas":{"2026":1},"Apendicite Aguda":{"2026":1},"Bronquiolite Viral Aguda":{"2026":1},"Queimaduras na Infância":{"2026":1},"Acidente Vascular Cerebral na Criança":{"2026":1},"Desenvolvimento Neuropsicomotor":{"2026":1},"Atestado de Óbito":{"2026":1},"Intoxicações Exógenas":{"2026":1},"Aleitamento Materno":{"2026":1},"Dermatite Seborreica":{"2026":1},"Conjuntivite Neonatal":{"2026":1},"Parada Cardiorrespiratória (PCR)":{"2026":1},"Alergia Alimentar":{"2026":1},"Síndromes Hipertensivas da Gestação":{"2026":1},"Diabetes Gestacional":{"2026":1},"Infecção do Trato Urinário (ITU)":{"2026":1},"Infecções Congênitas":{"2026":1},"Imunização na Gestação":{"2026":1},"Trabalho de Parto Prematuro":{"2026":1},"Avaliação da Vitalidade Fetal":{"2026":1},"Hemorragia Pós-Parto (HPP)":{"2026":1},"Assistência ao Parto":{"2026":1},"Puerpério":{"2026":2},"Doença Trofoblástica Gestacional":{"2026":1},"Anticoncepção":{"2026":1},"Síndrome da Bexiga Hiperativa":{"2026":1},"Ética e Legislação":{"2026":1},"Tratamento de CA de mama":{"2026":1},"Sangramento Uterino Anormal":{"2026":1},"Câncer de Colo de Útero":{"2026":1},"Vulvovaginites":{"2026":1},"Síndrome dos Ovários Policísticos (SOP)":{"2026":1},"Doenças Osteoarticulares":{"2026":1},"Osteoporose":{"2026":1},"Dislipidemia no Diabetes":{"2026":1},"Hipertireoidismo":{"2026":1},"Nefropatia Diabética":{"2026":1},"Acidente Vascular Cerebral Isquêmico":{"2026":1},"Insuficiência Cardíaca":{"2026":1},"Fibrilação Atrial":{"2026":1},"Infarto Agudo do Miocárdio (IAM)":{"2026":1},"Febre de Origem Obscura (FOO)":{"2026":1},"Câncer de Pele Não Melanoma":{"2026":1},"Neoplasias Mieloproliferativas":{"2026":1},"Urgências Oncológicas":{"2026":1},"Síndromes Paraneoplásicas":{"2026":1},"Infecções em Imunodeprimidos":{"2026":1},"Plaquetopenia":{"2026":1},"Espirometria":{"2026":1},"Distúrbios Respiratórios do Sono":{"2026":1},"Síndrome do Desconforto Respiratório Agudo":{"2026":1},"Choque e Hemodinâmica":{"2026":1},"Insuficiência Renal Aguda":{"2026":1},"Coagulopatias":{"2026":1},"Transfusão Sanguínea":{"2026":1},"Paciente Crítico":{"2026":1},"Melanoma Cutâneo":{"2026":1},"Cuidados Paliativos":{"2026":1},"Via Aérea Avançada":{"2026":1},"Tumores Renais":{"2026":1},"Pólipos Vesiculares":{"2026":1},"Cistos Pancreáticos":{"2026":1},"Colelitíase":{"2026":1},"Abdome Agudo Inflamatório":{"2026":1},"Grande Queimado":{"2026":1},"Hérnias da Parede Abdominal":{"2026":1},"Doença Ulcerosa Péptica":{"2026":1},"E-FAST":{"2026":1},"Trauma Abdominal":{"2026":2},"Trauma Torácico":{"2026":2},"Modelos de Saúde":{"2026":1},"Determinantes Sociais da Saúde":{"2026":1},"Fundamentos e Atributos da APS":{"2026":2},"Leis Orgânicas da Saúde (8.080/90)":{"2026":1},"Saúde Mental e Dependência Química":{"2026":2},"Condições Agudas e Queixas Comuns":{"2026":1},"Condições Crônicas e Risco Cardiovascular":{"2026":2},"Declaração de Óbito":{"2026":1},"Níveis de Evidência":{"2026":1},"Prevenção Quaternária":{"2026":1},"Prevenção Primária":{"2026":1},"Valores Preditivos":{"2026":2},"Risco e Associação":{"2026":1},"Coleta de Dados em Pesquisa":{"2026":1},"Saúde do Idoso e Polifarmácia":{"2026":1},"Escore de Risco / Validade Externa":{"2026":1},"Ingestão de Substâncias Cáusticas":{"2026":0},"Otite Média Aguda":{"2026":0},"Fibrose Cística":{"2026":0},"Asma":{"2026":0},"Síndrome de Guillain-Barré":{"2026":0},"Divertículo de Meckel":{"2026":0},"Epifisiólise Femoral Proximal":{"2026":0},"Hepatite A":{"2026":0},"Infecções Bacterianas":{"2026":0},"Resistência Antimicrobiana":{"2026":0},"Prevenção de Acidentes":{"2026":0},"Atendimento a Menores":{"2026":0},"Meningite":{"2026":0},"Crise Convulsiva Febril":{"2026":0},"Lúpus Eritematoso Sistêmico (LES)":{"2026":0},"Controle de Sintomas":{"2026":0},"Parvovirose":{"2026":0},"Derrame Papilar":{"2026":0},"Endometriose":{"2026":0},"Ultrassonografia e Líquido Amniótico":{"2026":0},"Gravidez Ectópica":{"2026":0},"Climatério e Menopausa":{"2026":0},"Rotura Prematura de Membranas (RPMO)":{"2026":0},"Isoimunização Materno-Fetal":{"2026":0},"Câncer de Ovário":{"2026":0},"Saúde da Mulher na APS":{"2026":0},"Método Clínico Centrado na Pessoa (MCCP)":{"2026":0},"Princípios da MBE":{"2026":0},"Infecção pelo HIV":{"2026":0},"Tuberculose":{"2026":0},"Indicadores de Saúde":{"2026":0},"Desenhos de Estudo":{"2026":0},"Conceitos Gerais de Prevenção":{"2026":0},"Financiamento e Economia da Saúde":{"2026":0},"Vigilância Epidemiológica":{"2026":0},"Hipertensão Arterial Sistêmica":{"2026":0},"Diabetes Mellitus Tipo 2":{"2026":0},"Diabetes Mellitus Tipo 1":{"2026":0},"Anemias Hemolíticas":{"2026":0},"Controle de Sintomas no Fim de Vida":{"2026":0},"Sepse e Choque Séptico":{"2026":0},"Leptospirose":{"2026":0},"Hipotireoidismo":{"2026":0},"Cirrose Hepática":{"2026":0},"Artrite Reumatoide":{"2026":0},"Endocardite Infecciosa":{"2026":0},"Dislipidemias":{"2026":0},"Nódulo de Tireoide":{"2026":0},"Obesidade":{"2026":0},"Doença Venosa Crônica":{"2026":0},"Trombose Venosa Profunda":{"2026":0},"Choque Hemorrágico":{"2026":0},"Cicatrização de Feridas":{"2026":0},"Jejum":{"2026":0},"Abdome Agudo Perfurativo":{"2026":0},"Fisiologia da Dor Abdominal":{"2026":0},"Nutrição Cirúrgica":{"2026":0},"Relação Médico-Paciente":{"2026":0},"Infecção de Sítio Cirúrgico":{"2026":0},"Hérnias Inguinais":{"2026":0},"Câncer Gástrico":{"2026":0},"Colecistite":{"2026":0},"Trauma Cranioencefálico":{"2026":0},"Câncer de Próstata":{"2026":0},"Hemorragia Digestiva Alta":{"2026":0},"Manejo de Via Aérea":{"2026":0},"Escroto Agudo":{"2026":0},"Pneumonia Adquirida na Comunidade":{"2026":0},"Princípios Gerais":{"2026":0},"Estado de Mal Epiléptico":{"2026":0},"Trauma Abdominal Fechado":{"2026":0},"Transtorno do Espectro Autista (TEA)":{"2026":0},"Anafilaxia":{"2026":0},"Encefalomielite Disseminada Aguda (ADEM)":{"2026":0},"Púrpura Trombocitopênica Imune (PTI)":{"2026":0},"Proteção à Criança e ao Adolescente":{"2026":0},"Celulite Orbitária":{"2026":0},"Massas Cervicais Congênitas":{"2026":0},"Leptospirose (Síndrome de Weil)":{"2026":0},"Higiene do Sono":{"2026":0},"Ginecologia Endócrina":{"2026":0},"Dor Pélvica":{"2026":0},"Sexologia":{"2026":0},"Padrão de Crescimento Gompertziano":{"2026":0},"Mutações":{"2026":0},"Fórcipes":{"2026":0},"Rotina e Rastreamento Pré-Natal":{"2026":0},"Cardiopatias na Gestação":{"2026":0},"Acretismo Placentário":{"2026":0},"Operação Cesariana":{"2026":0},"Anatomia e Fisiologia Esofágica":{"2026":0},"Analgesia Pós-Operatória":{"2026":0},"Consentimento Informado":{"2026":0},"Queimaduras Térmicas":{"2026":0},"Retalhos Cutâneos":{"2026":0},"Doença Diverticular":{"2026":0},"Doença do Refluxo Gastroesofágico":{"2026":0},"Cistos de Colédoco":{"2026":0},"Icterícia Obstrutiva":{"2026":0},"Pólipos Colorretais":{"2026":0},"Câncer de Testículo":{"2026":0},"Câncer de Pulmão":{"2026":0},"Adequação de Esforço Terapêutico":{"2026":0},"Anemia Aguda":{"2026":0},"Infecção pelo HIV e Doenças Oportunistas":{"2026":0},"Doença Arterial Coronariana":{"2026":0},"Eletrocardiograma (ECG)":{"2026":0},"Hemorragia Digestiva Alta (HDA)":{"2026":0},"Disfagia":{"2026":0},"Transtornos Funcionais e Motores":{"2026":0},"Valvopatias":{"2026":0},"Doenças do Pericárdio":{"2026":0},"Doença de Chagas":{"2026":0},"Prevenção Terciária":{"2026":0},"Leitura Crítica de Artigos Científicos":{"2026":0},"Validade de Testes":{"2026":0},"Prevenção Secundária":{"2026":0},"Interpretação Clínica de Exames":{"2026":0},"Infecciosas e ISTs na APS":{"2026":0},"Saúde da Criança e Aleitamento":{"2026":0},"Reforma Sanitária":{"2026":0},"Reforma Sanitária e CF/88":{"2026":0},"Infecção pelo HIV na Infância":{"2026":0},"Doença de Kawasaki":{"2026":0},"Insuficiência Adrenal":{"2026":0},"Condutas de Fim de Vida":{"2026":0},"Icterícia Neonatal":{"2026":0},"Violência e Maus-Tratos na Infância":{"2026":0},"Traumatismo Cranioencefálico":{"2026":0},"Infecções de Pele e Partes Moles":{"2026":0},"Síndrome do Choque Tóxico":{"2026":0},"Miocardite":{"2026":0},"Raiva Humana":{"2026":0},"Distócias do Trabalho de Parto":{"2026":0},"IST":{"2026":0},"BI-RADS":{"2026":0},"Estadiamento":{"2026":0},"Dismenorreia":{"2026":0},"Reconstrução Mamária":{"2026":0},"Abcesso Residual":{"2026":0},"Diretivas Antecipadas de Vontade":{"2026":0},"Câncer de Esôfago":{"2026":0},"Indicações de Cirurgia Metabólica":{"2026":0},"Trauma Vascular de Extremidade":{"2026":0},"Nefrolitíase (Cólica Nefrética)":{"2026":0},"Pneumotórax Espontâneo Secundário":{"2026":0},"Febre Reumática":{"2026":0},"Insuficiência Aórtica":{"2026":0},"Prolapso da Valva Mitral":{"2026":0},"Preparo Pré-Operatório e Anticoagulação":{"2026":0},"Derrame Pleural":{"2026":0},"Doença Pulmonar Obstrutiva Crônica (DPOC)":{"2026":0},"Reposição Androgênica na Menopausa":{"2026":0},"Síndrome Metabólica":{"2026":0},"Hipercalcemia":{"2026":0},"Paralisia de Nervos Cranianos":{"2026":0},"Miopatias":{"2026":0},"Conferências de Saúde":{"2026":0},"Ditadura Militar":{"2026":0},"Notificação Compulsória":{"2026":0},"Medicina Baseada em Evidências":{"2026":0},"Febre de Origem Indeterminada":{"2026":0},"Encefalite Autoimune":{"2026":0},"Estenose Hipertrófica do Piloro":{"2026":0},"Doença de Hirschsprung":{"2026":0},"Farmacodermias":{"2026":0},"Osteomielite Aguda":{"2026":0},"Mononucleose Infecciosa":{"2026":0},"Pneumonite de Hipersensibilidade":{"2026":0},"Cólica do Lactente":{"2026":0},"Reanimação Neonatal":{"2026":0},"Diagnóstico de CA de mama":{"2026":0},"Leiomiomatose Uterina":{"2026":0},"Doença Tubária":{"2026":0},"Abortamento":{"2026":0},"Hiperêmese Gravídica":{"2026":0},"Gestação Gemelar":{"2026":0},"Broto Mamário":{"2026":0},"Esclerose Múltipla":{"2026":0},"Doença de Parkinson":{"2026":0},"Esclerose Sistêmica (Esclerodermia)":{"2026":0},"Colestase":{"2026":0},"Celulite / Erisipela":{"2026":0},"Transtorno Obsessivo Compulsivo":{"2026":0},"Meningite por Doença de Lyme":{"2026":0},"Herpes Zoster":{"2026":0},"Nefrolitíase":{"2026":0},"Doença Renal Crônica (DRC)":{"2026":0},"Terapia de Substituição Renal":{"2026":0},"Fisiologia Intestinal":{"2026":0},"Retocolite Ulcerativa (RCU)":{"2026":0},"Síndrome do Intestino Irritável":{"2026":0},"Polipose Adenomatosa Familiar (PAF)":{"2026":0},"Lesão por Pressão":{"2026":0},"Torção Testicular":{"2026":0},"Fissura Anal Aguda":{"2026":0},"Autonomia e Diretivas Antecipadas":{"2026":0},"Colite Pseudomembranosa":{"2026":0},"Doença Hemorroidária":{"2026":0},"Íleo Adinâmico / Paralítico":{"2026":0},"Desfechos Clínicos":{"2026":0},"Indicadores em Saúde":{"2026":0},"Vacinação e Equidade":{"2026":0},"Redes, Pactos e Políticas Públicas":{"2026":0},"Medidas de Associação e Impacto":{"2026":0},"Ingestão de Corpo Estranho":{"2026":0},"Litíase Renal na Infância":{"2026":0},"TDAH":{"2026":0},"Hérnia Inguinal":{"2026":0},"Hipertensão Intracraniana Idiopática":{"2026":0},"Afecções Respiratórias do RN":{"2026":0},"Amenorreia":{"2026":0},"Massas Anexiais Benignas":{"2026":0},"Doença Inflamatória Pélvica (DIP)":{"2026":0},"Bioética":{"2026":0},"Promoção da Saúde e Rastreamento":{"2026":0},"Período de Transição":{"2026":0},"Era Previdenciária":{"2026":0},"Incidência e Prevalência":{"2026":0},"Sistemas de Informação":{"2026":0},"Anti-hipertensivos":{"2026":0},"Fibromialgia":{"2026":0},"Diarreia Crônica":{"2026":0},"Hipoglicemia":{"2026":0},"Espondilodiscite":{"2026":0},"Síncope":{"2026":0},"Leucemia Aguda":{"2026":0},"Tromboembolismo Pulmonar":{"2026":0},"Bronquiectasias":{"2026":0},"Anel de Schatzki":{"2026":0},"Vasos Coronarianos":{"2026":0},"Pancreatite Aguda":{"2026":0},"Síndromes Colestáticas":{"2026":0},"Marcadores Tumorais":{"2026":0},"Queimaduras":{"2026":0},"Síndrome Aórtica Aguda":{"2026":0},"Imunodeficiências Primárias":{"2026":0},"Coqueluche (Síndrome Coqueluchoide)":{"2026":0},"Distúrbios da Coagulação":{"2026":0},"Meningoencefalite Viral":{"2026":0},"Encefalopatia Hipóxico-Isquêmica":{"2026":0},"Sífilis Congênita":{"2026":0},"Tumores Ovarianos na Infância":{"2026":0},"Faringotonsilites":{"2026":0},"Tumores Ósseos":{"2026":0},"Prolapso Retal":{"2026":0},"Erupção Variceliforme de Kaposi":{"2026":0},"Hiperplasia Endometrial":{"2026":0},"Trabalho de Parto":{"2026":0},"Estática Fetal":{"2026":0},"Placenta Prévia":{"2026":0},"Ginecologia Preventiva":{"2026":0},"Infecções de Partes Moles":{"2026":0},"Coledocolitíase":{"2026":0},"Hemobilia":{"2026":0},"Infecção de Sítio Cirúrgico (Mediastinite)":{"2026":0},"Abscesso Anorretal":{"2026":0},"Complicações do Infarto Agudo do Miocárdio":{"2026":0},"Divertículos Esofágicos":{"2026":0},"Estenose Aórtica":{"2026":0},"Respiração de Cheyne-Stokes":{"2026":0},"Dermatomiosite":{"2026":0},"Cefaleias":{"2026":0},"Fisiologia Digestiva":{"2026":0},"Raciocínio Clínico":{"2026":0},"heminegligência espacial":{"2026":0},"Hemoterapia":{"2026":0},"Risco Cardiovascular em Atletas":{"2026":0},"Linfoma Intestinal":{"2026":0},"Leucemia Linfocítica Crônica (LLC)":{"2026":0},"Pneumonia Associada à Ventilação Mecânica (PAV)":{"2026":0},"Pneumoconiose (Silicose)":{"2026":0},"Síndrome de Cushing":{"2026":0},"Princípios do SUS":{"2026":0},"Participação e Controle Social (Lei 8.142)":{"2026":0},"Nutrição e Sociedade":{"2026":0},"Número Necessário para Tratar (NNT)":{"2026":0},"Encefalite Viral":{"2026":0},"Miocardite Viral":{"2026":0},"Marcos do Desenvolvimento":{"2026":0},"Choque Séptico":{"2026":0},"Manejo da Dor Aguda Severa":{"2026":0},"Síndrome de Down":{"2026":0},"Síndrome de Aspiração Meconial":{"2026":0},"Neutropenia Febril":{"2026":0},"Medidas de Associação":{"2026":0},"Saúde Mental":{"2026":0},"República Velha":{"2026":0},"Fissura Labiopalatina":{"2026":0},"Doença Arterial Obstrutiva Periférica":{"2026":0},"Fisiologia Esofágica":{"2026":0},"Hérnias Hiatais":{"2026":0},"Íleo Biliar":{"2026":0},"Icterícia Pós-Operatória":{"2026":0},"Colecistite Aguda Alitiásica":{"2026":0},"Linfonodos Mamários":{"2026":0},"Hemorragia Digestiva Baixa":{"2026":0},"Bypass Gástrico em Y de Roux":{"2026":0},"Fisiologia do Apetite":{"2026":0},"Metabolismo de Fármacos":{"2026":0},"Cor Pulmonale":{"2026":0},"Tosse Crônica":{"2026":0},"Semiologia Cardiovascular":{"2026":0},"Síndrome de Takotsubo":{"2026":0},"Anatomia da Dor":{"2026":0},"Hemoptise":{"2026":0},"Síndrome do Anticorpo Antifosfolipídeo (SAF)":{"2026":0},"Lúpus Eritematoso Sistêmico na Gestação":{"2026":0},"Saúde da Mulher":{"2026":0},"Saúde da Criança":{"2026":0},"Epidemiologia":{"2026":0},"Sífilis Primária":{"2026":0},"Avaliação Pré-Operatória":{"2026":0},"Rastreamento Populacional":{"2026":0},"Colangite Biliar Primária":{"2026":0},"Ensaios Clínicos":{"2026":0},"Artrite Reativa":{"2026":0},"Doença da Arranhadura do Gato":{"2026":0},"Neurotoxoplasmose":{"2026":0},"Erisipela":{"2026":0},"Anemia Ferropriva":{"2026":0},"Tratamento de Incontinências":{"2026":0},"Fisiologia Fetal e Placentária":{"2026":0},"Farmacologia Obstétrica":{"2026":0},"Doenças Tireoidianas na Gravidez":{"2026":0},"Doenças Neurológicas na Gestação":{"2026":0},"Prontuário Médico":{"2026":0},"Abdome Agudo":{"2026":0},"Febre Pós-Operatória":{"2026":0},"Sepse e Choque":{"2026":0},"Câncer Colorretal":{"2026":0},"Tumores Benignos do Fígado":{"2026":0},"Aneurisma de Aorta Abdominal":{"2026":0},"Herpangina":{"2026":0},"Mastoidite Aguda":{"2026":0},"Púrpura de Henoch-Schönlein":{"2026":0},"Choque Pediátrico":{"2026":0},"Sinusite Bacteriana Aguda":{"2026":0},"Pneumonia Complicada":{"2026":0},"Tipos de Estudos Epidemiológicos":{"2026":0},"Medidas de Impacto":{"2026":0},"Ensino Médico":{"2026":0},"Análise de Artigos":{"2026":0},"Convulsão Neonatal":{"2026":0},"Diarreia Aguda e Crônica":{"2026":0},"Laringite Estridulosa (Crupe)":{"2026":0},"Adenite Cervical Bacteriana":{"2026":0},"Tinea Capitis (Querion de Celso)":{"2026":0},"Responsabilidade Médica":{"2026":0},"Infecção do Trato Urinário":{"2026":0},"Síndrome Compartimental Abdominal":{"2026":0},"Cuidados em Pacientes Queimados":{"2026":0},"Epidemiologia do Trauma":{"2026":0},"Avaliação de Função Hepática":{"2026":0},"Doença Arterial Carotídea":{"2026":0},"Anatomia Biliar":{"2026":0},"Doenças Orificiais (HPV)":{"2026":0},"Descolamento Prematuro de Placenta (DPP)":{"2026":0},"Osteoartrite (Artrose)":{"2026":0},"Lesões Elementares da Pele":{"2026":0},"Doença Diverticular dos Cólons":{"2026":0},"Insuficiência Respiratória Crônica":{"2026":0},"Anemia na Doença Renal Crônica":{"2026":0},"Litíase Renal":{"2026":0},"Feocromocitoma":{"2026":0},"Medidas de Frequência de Doenças":{"2026":0}},"areaYear":{"Pediatria":{"2026":20},"Ginecologia e Obstetrícia":{"2026":20},"Clínica Médica":{"2026":20},"Cirurgia Geral":{"2026":20},"Medicina Preventiva / Saúde Coletiva":{"2026":20}},"questoesTema":{"Pediatria|||Infectologia Pediátrica":[{"id":"2026.1","subtema":"Conjuntivite Infecciosa","assunto":"Diagnóstico clínico (Síndrome Oculoglandular de Parinaud)","plano":"Gratuito"}],"Pediatria|||Neonatologia":[{"id":"2026.2","subtema":"Hérnia Diafragmática Congênita","assunto":"Características clínicas e prognóstico","plano":"Gratuito"},{"id":"2026.18","subtema":"Conjuntivite Neonatal","assunto":"Conduta terapêutica para conjuntivite gonocócica","plano":"Gratuito"}],"Pediatria|||Nefrologia Pediátrica":[{"id":"2026.3","subtema":"Síndrome Nefrótica","assunto":"Indicação e riscos da infusão de albumina","plano":"Gratuito"}],"Pediatria|||Cirurgia Pediátrica":[{"id":"2026.4","subtema":"Intussuscepção Intestinal","assunto":"Diagnóstico e apresentação clínica","plano":"Gratuito"},{"id":"2026.9","subtema":"Apendicite Aguda","assunto":"Apresentação clínica e conduta analgésica","plano":"Gratuito"}],"Pediatria|||Endocrinologia Pediátrica":[{"id":"2026.5","subtema":"Cetoacidose Diabética (CAD)","assunto":"Manejo terapêutico e critérios de gravidade","plano":"Gratuito"},{"id":"2026.6","subtema":"Baixa Estatura","assunto":"Investigação diagnóstica (Exames iniciais vs GH)","plano":"Gratuito"}],"Pediatria|||Neurologia Pediátrica":[{"id":"2026.7","subtema":"Síndromes Neurocutâneas","assunto":"Diagnóstico clínico (Esclerose Tuberosa)","plano":"Gratuito"},{"id":"2026.12","subtema":"Acidente Vascular Cerebral na Criança","assunto":"Conduta e estabilização inicial na emergência","plano":"Gratuito"}],"Pediatria|||Cardiologia Pediátrica":[{"id":"2026.8","subtema":"Cardiopatias Congênitas","assunto":"Achado propedêutico (Desdobramento fixo de B2 em CIA)","plano":"Gratuito"}],"Pediatria|||Pneumologia Pediátrica":[{"id":"2026.10","subtema":"Bronquiolite Viral Aguda","assunto":"Manejo terapêutico e uso de oxigenoterapia","plano":"Gratuito"}],"Pediatria|||Trauma Pediátrico":[{"id":"2026.11","subtema":"Queimaduras na Infância","assunto":"Conduta inicial e ressuscitação volêmica (Fórmula de Parkland)","plano":"Gratuito"}],"Pediatria|||Puericultura":[{"id":"2026.13","subtema":"Desenvolvimento Neuropsicomotor","assunto":"Marcos do desenvolvimento (2 a 4 meses)","plano":"Gratuito"}],"Pediatria|||Ética e Legislação":[{"id":"2026.14","subtema":"Atestado de Óbito","assunto":"Regras de preenchimento em caso de morte violenta/suspeita","plano":"Gratuito"}],"Pediatria|||Toxicologia Pediátrica":[{"id":"2026.15","subtema":"Intoxicações Exógenas","assunto":"Métodos de descontaminação e antídotos específicos","plano":"Gratuito"}],"Pediatria|||Nutrição Infantil":[{"id":"2026.16","subtema":"Aleitamento Materno","assunto":"Orientações de técnica e manejo do aleitamento","plano":"Gratuito"}],"Pediatria|||Dermatologia Pediátrica":[{"id":"2026.17","subtema":"Dermatite Seborreica","assunto":"Identificação do agente etiológico","plano":"Gratuito"}],"Pediatria|||Emergência Pediátrica":[{"id":"2026.19","subtema":"Parada Cardiorrespiratória (PCR)","assunto":"Técnica correta de compressão torácica em RCP","plano":"Gratuito"}],"Pediatria|||Alergia e Imunologia Pediátrica":[{"id":"2026.20","subtema":"Alergia Alimentar","assunto":"Fisiopatologia e diagnóstico (FPIES vs IgE mediada)","plano":"Gratuito"}],"Ginecologia e Obstetrícia|||Patologias da Gestação":[{"id":"2026.21","subtema":"Síndromes Hipertensivas da Gestação","assunto":"Diagnóstico e conduta na Pré-eclâmpsia com sinais de gravidade","plano":"Gratuito"},{"id":"2026.22","subtema":"Diabetes Gestacional","assunto":"Diagnóstico e conduta terapêutica inicial","plano":"Gratuito"},{"id":"2026.23","subtema":"Infecção do Trato Urinário (ITU)","assunto":"Manejo da Bacteriúria Assintomática e profilaxia para GBS","plano":"Gratuito"},{"id":"2026.24","subtema":"Infecções Congênitas","assunto":"Interpretação sorológica e conduta em Toxoplasmose","plano":"Gratuito"}],"Ginecologia e Obstetrícia|||Pré-Natal e Fisiologia":[{"id":"2026.25","subtema":"Imunização na Gestação","assunto":"Calendário vacinal da gestante (Indicação dTpa)","plano":"Gratuito"},{"id":"2026.27","subtema":"Avaliação da Vitalidade Fetal","assunto":"Conduta obstétrica e indicação de indução (Índice de Bishop)","plano":"Gratuito"}],"Ginecologia e Obstetrícia|||Parto e Puerpério":[{"id":"2026.26","subtema":"Trabalho de Parto Prematuro","assunto":"Escolha e contraindicação de tocolíticos","plano":"Gratuito"},{"id":"2026.28","subtema":"Hemorragia Pós-Parto (HPP)","assunto":"Conduta sequencial e uterotônicos","plano":"Gratuito"},{"id":"2026.29","subtema":"Assistência ao Parto","assunto":"Princípios da assistência ao parto humanizado","plano":"Gratuito"},{"id":"2026.30","subtema":"Puerpério","assunto":"Diagnóstico e manejo da mastite puerperal","plano":"Gratuito"},{"id":"2026.32","subtema":"Puerpério","assunto":"Quadro clínico e diagnóstico de endometrite","plano":"Gratuito"}],"Ginecologia e Obstetrícia|||Sangramentos (1ª e 2ª Metade)":[{"id":"2026.31","subtema":"Doença Trofoblástica Gestacional","assunto":"Diagnóstico histopatológico (Mola hidatiforme completa)","plano":"Gratuito"}],"Ginecologia e Obstetrícia|||Endócrina e Anticoncepção":[{"id":"2026.33","subtema":"Anticoncepção","assunto":"Indicação e esquema de Terapia Hormonal (TH)","plano":"Gratuito"},{"id":"2026.37","subtema":"Sangramento Uterino Anormal","assunto":"Investigação de sangramento pós-menopausa (Biópsia endometrial)","plano":"Gratuito"},{"id":"2026.40","subtema":"Síndrome dos Ovários Policísticos (SOP)","assunto":"Síndrome dos Ovários Policísticos (Critérios de Rotterdam e tratamento)","plano":"Gratuito"}],"Ginecologia e Obstetrícia|||Uroginecologia":[{"id":"2026.34","subtema":"Síndrome da Bexiga Hiperativa","assunto":"Diagnóstico de Síndrome da Bexiga Hiperativa","plano":"Gratuito"}],"Ginecologia e Obstetrícia|||Saúde da Mulher e Epidemiologia":[{"id":"2026.35","subtema":"Ética e Legislação","assunto":"Princípio da autonomia e consentimento informado","plano":"Gratuito"}],"Ginecologia e Obstetrícia|||Mastologia":[{"id":"2026.36","subtema":"Tratamento de CA de mama","assunto":"Tratamento do Câncer de Mama Triplo Negativo","plano":"Gratuito"}],"Ginecologia e Obstetrícia|||Oncologia":[{"id":"2026.38","subtema":"Câncer de Colo de Útero","assunto":"Conduta em Câncer de Colo Uterino IB1/IB2 (Cirurgia radical)","plano":"Gratuito"}],"Ginecologia e Obstetrícia|||Infecções e Doenças Benignas":[{"id":"2026.39","subtema":"Vulvovaginites","assunto":"Diagnóstico e tratamento de Tricomoníase","plano":"Gratuito"}],"Clínica Médica|||Reumatologia":[{"id":"2026.41","subtema":"Doenças Osteoarticulares","assunto":"Diagnóstico clínico de Tenossinovite de De Quervain","plano":"Gratuito"}],"Clínica Médica|||Endocrinologia":[{"id":"2026.42","subtema":"Osteoporose","assunto":"Tratamento medicamentoso pós-fratura patológica","plano":"Gratuito"},{"id":"2026.44","subtema":"Hipertireoidismo","assunto":"Manejo da Doença de Graves na gestação","plano":"Gratuito"}],"Clínica Médica|||Cardiologia":[{"id":"2026.43","subtema":"Dislipidemia no Diabetes","assunto":"Indicação e meta para uso de estatinas","plano":"Gratuito"},{"id":"2026.47","subtema":"Insuficiência Cardíaca","assunto":"Otimização da terapia farmacológica (iSGLT2 / ARNI)","plano":"Gratuito"},{"id":"2026.48","subtema":"Fibrilação Atrial","assunto":"Conduta em taquiarritmia instável (Cardioversão)","plano":"Gratuito"},{"id":"2026.49","subtema":"Infarto Agudo do Miocárdio (IAM)","assunto":"Indicação de estratégia invasiva no IAM sem supra de ST","plano":"Gratuito"}],"Clínica Médica|||Nefrologia":[{"id":"2026.45","subtema":"Nefropatia Diabética","assunto":"Indicação de inibidores de SGLT-2","plano":"Gratuito"}],"Clínica Médica|||Neurologia":[{"id":"2026.46","subtema":"Acidente Vascular Cerebral Isquêmico","assunto":"Critérios para trombólise no Wake-up stroke (Mismatch)","plano":"Gratuito"}],"Clínica Médica|||Infectologia":[{"id":"2026.50","subtema":"Febre de Origem Obscura (FOO)","assunto":"Critérios diagnósticos e etiologias associadas","plano":"Gratuito"},{"id":"2026.55","subtema":"Infecções em Imunodeprimidos","assunto":"Manejo e profilaxia em paciente oncológico (Neutropenia)","plano":"Gratuito"}],"Clínica Médica|||Dermatologia":[{"id":"2026.51","subtema":"Câncer de Pele Não Melanoma","assunto":"Características clínicas e epidemiologia","plano":"Gratuito"}],"Clínica Médica|||Hematologia":[{"id":"2026.52","subtema":"Neoplasias Mieloproliferativas","assunto":"Apresentação e riscos em Trombocitemia / Policitemia","plano":"Gratuito"},{"id":"2026.56","subtema":"Plaquetopenia","assunto":"Conduta na Trombocitopenia Induzida por Heparina (TIH)","plano":"Gratuito"}],"Clínica Médica|||Oncologia":[{"id":"2026.53","subtema":"Urgências Oncológicas","assunto":"Investigação e etiologia da Síndrome da Veia Cava Superior","plano":"Gratuito"},{"id":"2026.54","subtema":"Síndromes Paraneoplásicas","assunto":"Quadro clínico e etiologias (SIADH e Hipercalcemia)","plano":"Gratuito"}],"Clínica Médica|||Pneumologia":[{"id":"2026.57","subtema":"Espirometria","assunto":"Interpretação de espirometria e características da doença","plano":"Gratuito"},{"id":"2026.58","subtema":"Distúrbios Respiratórios do Sono","assunto":"Fisiopatologia e diagnóstico da Síndrome de Hipoventilação da Obesidade","plano":"Gratuito"}],"Clínica Médica|||Medicina Intensiva":[{"id":"2026.59","subtema":"Síndrome do Desconforto Respiratório Agudo","assunto":"Diagnóstico e suspeita de TRALI vs SARA","plano":"Gratuito"},{"id":"2026.60","subtema":"Choque e Hemodinâmica","assunto":"Reconhecimento de estado de choque e mecanismos compensatórios","plano":"Gratuito"}],"Cirurgia Geral|||Cuidados Pós-Operatórios":[{"id":"2026.61","subtema":"Insuficiência Renal Aguda","assunto":"Avaliação de volemia e diagnóstico diferencial","plano":"Gratuito"},{"id":"2026.62","subtema":"Coagulopatias","assunto":"Interpretação de Tromboelastografia (TEG) e conduta transfusional","plano":"Gratuito"},{"id":"2026.63","subtema":"Transfusão Sanguínea","assunto":"Critérios e gatilhos transfusionais pós-operatórios","plano":"Gratuito"}],"Cirurgia Geral|||Medicina Intensiva":[{"id":"2026.64","subtema":"Paciente Crítico","assunto":"Controle glicêmico em Unidade de Terapia Intensiva","plano":"Gratuito"},{"id":"2026.67","subtema":"Via Aérea Avançada","assunto":"Critérios e indicações de Traqueostomia Precoce","plano":"Gratuito"}],"Cirurgia Geral|||Dermatologia":[{"id":"2026.65","subtema":"Melanoma Cutâneo","assunto":"Conduta cirúrgica inicial (Biópsia excisional)","plano":"Gratuito"}],"Cirurgia Geral|||Bioética":[{"id":"2026.66","subtema":"Cuidados Paliativos","assunto":"Manejo da futilidade terapêutica e decisão com familiares","plano":"Gratuito"}],"Cirurgia Geral|||Urologia":[{"id":"2026.68","subtema":"Tumores Renais","assunto":"Abordagem cirúrgica em idoso frágil e avaliação pré-operatória","plano":"Gratuito"}],"Cirurgia Geral|||Cirurgia Hepatobiliar":[{"id":"2026.69","subtema":"Pólipos Vesiculares","assunto":"Indicação cirúrgica (Colecistectomia profilática)","plano":"Gratuito"},{"id":"2026.71","subtema":"Colelitíase","assunto":"Conduta em colelitíase sintomática","plano":"Gratuito"}],"Cirurgia Geral|||Oncologia Cirúrgica":[{"id":"2026.70","subtema":"Cistos Pancreáticos","assunto":"Avaliação de risco e ressecção de Neoplasia Intraductal (IPMN)","plano":"Gratuito"}],"Cirurgia Geral|||Cirurgia do Aparelho Digestivo":[{"id":"2026.72","subtema":"Abdome Agudo Inflamatório","assunto":"Tratamento cirúrgico de escolha","plano":"Gratuito"}],"Cirurgia Geral|||Queimaduras":[{"id":"2026.73","subtema":"Grande Queimado","assunto":"Fórmula de reposição volêmica (Parkland)","plano":"Gratuito"}],"Cirurgia Geral|||Parede Abdominal":[{"id":"2026.74","subtema":"Hérnias da Parede Abdominal","assunto":"Fatores de risco para recidiva em herniorrafia umbilical","plano":"Gratuito"}],"Cirurgia Geral|||Gastroenterologia":[{"id":"2026.75","subtema":"Doença Ulcerosa Péptica","assunto":"Tratamento erradicador de Helicobacter pylori","plano":"Gratuito"}],"Cirurgia Geral|||Cirurgia do Trauma":[{"id":"2026.76","subtema":"E-FAST","assunto":"Janelas ultrassonográficas do E-FAST","plano":"Gratuito"},{"id":"2026.77","subtema":"Trauma Abdominal","assunto":"Conduta em paciente instável com FAST positivo","plano":"Gratuito"},{"id":"2026.78","subtema":"Trauma Abdominal","assunto":"Conduta cirúrgica na evisceração","plano":"Gratuito"},{"id":"2026.79","subtema":"Trauma Torácico","assunto":"Indicação de Toracotomia de Urgência no hemotórax maciço","plano":"Gratuito"},{"id":"2026.80","subtema":"Trauma Torácico","assunto":"Conduta inicial em pneumotórax aberto (Curativo 3 pontas)","plano":"Gratuito"}],"Medicina Preventiva / Saúde Coletiva|||História das Políticas de Saúde no Brasil":[{"id":"2026.81","subtema":"Modelos de Saúde","assunto":"Características do modelo Bismarckiano vs Beveridgiano","plano":"Gratuito"}],"Medicina Preventiva / Saúde Coletiva|||Perfis e Indicadores Demográficos":[{"id":"2026.82","subtema":"Determinantes Sociais da Saúde","assunto":"Análise de iniquidades e desigualdade socioeconômica","plano":"Gratuito"}],"Medicina Preventiva / Saúde Coletiva|||Atenção Primária à Saúde":[{"id":"2026.83","subtema":"Fundamentos e Atributos da APS","assunto":"Definições históricas (Alma-Ata) e papel da APS","plano":"Gratuito"},{"id":"2026.85","subtema":"Fundamentos e Atributos da APS","assunto":"Conceito de Coordenação de Cuidados","plano":"Gratuito"},{"id":"2026.86","subtema":"Saúde Mental e Dependência Química","assunto":"Abordagem e tratamento da Depressão leve/moderada","plano":"Gratuito"},{"id":"2026.87","subtema":"Condições Agudas e Queixas Comuns","assunto":"Raciocínio clínico na tosse crônica (iECA)","plano":"Gratuito"},{"id":"2026.88","subtema":"Saúde Mental e Dependência Química","assunto":"Estratégias de cessação e uso da bupropiona","plano":"Gratuito"},{"id":"2026.89","subtema":"Condições Crônicas e Risco Cardiovascular","assunto":"Fisiopatologia (fome hedônica) e fatores ambientais","plano":"Gratuito"},{"id":"2026.98","subtema":"Saúde do Idoso e Polifarmácia","assunto":"Cuidados paliativos e decisão compartilhada em idosos","plano":"Gratuito"},{"id":"2026.99","subtema":"Condições Crônicas e Risco Cardiovascular","assunto":"Interpretação de calculadoras de risco e aconselhamento","plano":"Gratuito"}],"Medicina Preventiva / Saúde Coletiva|||A Evolução do SUS":[{"id":"2026.84","subtema":"Leis Orgânicas da Saúde (8.080/90)","assunto":"Atribuições e escopo de atuação (Lei 8080/90)","plano":"Gratuito"}],"Medicina Preventiva / Saúde Coletiva|||Ética médica, Bioética e Documentação":[{"id":"2026.90","subtema":"Declaração de Óbito","assunto":"Identificação correta da causa básica do óbito","plano":"Gratuito"}],"Medicina Preventiva / Saúde Coletiva|||Estudos Epidemiológicos (Classificação)":[{"id":"2026.91","subtema":"Níveis de Evidência","assunto":"Estrutura da Pirâmide de Haynes (Sumários e Diretrizes)","plano":"Gratuito"},{"id":"2026.97","subtema":"Coleta de Dados em Pesquisa","assunto":"Vantagens do autorrelato vs Dados de Prontuário","plano":"Gratuito"}],"Medicina Preventiva / Saúde Coletiva|||Níveis de Prevenção":[{"id":"2026.92","subtema":"Prevenção Quaternária","assunto":"Manejo do excesso de exames (Check-up exagerado)","plano":"Gratuito"},{"id":"2026.93","subtema":"Prevenção Primária","assunto":"Abordagem relacional e educação sexual em adolescentes","plano":"Gratuito"}],"Medicina Preventiva / Saúde Coletiva|||Estatística de Testes Diagnósticos":[{"id":"2026.94","subtema":"Valores Preditivos","assunto":"Interpretação do Valor Preditivo Positivo (VPP)","plano":"Gratuito"},{"id":"2026.96","subtema":"Valores Preditivos","assunto":"Impacto da prevalência no Valor Preditivo (Falso-positivos)","plano":"Gratuito"}],"Medicina Preventiva / Saúde Coletiva|||Estudos Epidemiológicos (Análise Estatística e Aplicação)":[{"id":"2026.95","subtema":"Risco e Associação","assunto":"Interpretação do Número Necessário para Tratar (NNT)","plano":"Gratuito"}],"Pediatria|||Gastroenterologia Pediátrica":[],"Pediatria|||Ortopedia Pediátrica":[],"Pediatria|||Reumatologia Pediátrica":[],"Pediatria|||Cuidados Paliativos Pediátricos":[],"Medicina Preventiva / Saúde Coletiva|||Epidemias, Endemias e Pandemias":[],"Medicina Preventiva / Saúde Coletiva|||Indicadores de Morbimortalidade":[],"Medicina Preventiva / Saúde Coletiva|||Notificação":[],"Clínica Médica|||Cuidados Paliativos":[],"Clínica Médica|||Gastroenterologia":[],"Cirurgia Geral|||Cirurgia Vascular":[],"Cirurgia Geral|||Cirurgia Plástica":[],"Cirurgia Geral|||Cuidados Pré-Operatórios":[],"Pediatria|||Psiquiatria Infantil":[],"Pediatria|||Hematologia Pediátrica":[],"Cirurgia Geral|||Cirurgia Torácica":[],"Cirurgia Geral|||Cirurgia Bariátrica":[],"Clínica Médica|||Psiquiatria":[],"Clínica Médica|||Urologia":[],"Cirurgia Geral|||Coloproctologia":[],"Clínica Médica|||Alergia e Imunologia":[],"Cirurgia Geral|||Cirurgia Cardiovascular":[],"Pediatria|||Oncologia Pediátrica":[],"Cirurgia Geral|||Infecções Cirúrgicas":[],"Clínica Médica|||Medicina Baseada em Evidências":[],"Pediatria|||Genética Pediátrica":[],"Medicina Preventiva / Saúde Coletiva|||Políticas de Saúde Mental / SUS":[],"Cirurgia Geral|||Mastologia":[],"Clínica Médica|||Farmacologia Clínica":[],"Clínica Médica|||Epidemiologia Clínica":[],"Clínica Médica|||Doenças Infecciosas":[],"Pediatria|||Medicina Intensiva Pediátrica":[]}};
+
+
+const H = AMP_DATA.hierarchy;
+let sortState = { temas: 'desc', subbar: 'desc' };
+
+function toggleSort(id) {
+  sortState[id] = sortState[id] === 'desc' ? 'asc' : 'desc';
+  const btn = el('sort' + id.charAt(0).toUpperCase() + id.slice(1));
+  if(btn) {
+    btn.textContent = sortState[id] === 'desc' ? '↓ Mayor' : '↑ Menor';
+    btn.classList.toggle('active', sortState[id] === 'asc');
+  }
+  // Re-render current view
+  const area = el('selArea').value;
+  const tema = el('selTema').value;
+  const sub = el('selSub').value;
+  if(id === 'temas' && area) updateGeral(area);
+  if(id === 'subbar' && area && tema) updateRaioX(area, tema, sub);
+}
+const TS = AMP_DATA.timeSeries;
+const SS = AMP_DATA.subtemaSeries;
+const AY = AMP_DATA.areaYear;
+const QT = AMP_DATA.questoesTema;
+const QS = AMP_DATA.questoesSubtema;
+let YRS = AMP_DATA.years.slice();
+const REC = ['2024','2025','2026'];
+const OLD = ['2017','2018','2019','2020','2021','2022','2023'];
+
+let charts = {};
+Chart.defaults.color = '#5a6a88';
+Chart.defaults.font.family = 'DM Sans';
+
+function dc(id){ if(charts[id]){charts[id].destroy();delete charts[id];} }
+function show(id){ document.getElementById(id).style.display='block'; }
+function hide(id){ document.getElementById(id).style.display='none'; }
+function el(id){ return document.getElementById(id); }
+function txt(id,v){ el(id).textContent=v; }
+
+// Populate areas
+document.addEventListener('DOMContentLoaded', function() {
+  // Ocultar filtro de ano se só há 1 ano
+  if(YRS.length === 1) {
+    var fg = document.querySelector('#anosBtns');
+    if(fg && fg.parentElement) fg.parentElement.style.display = 'none';
+  }
+  initAnos();
+  Object.keys(H).forEach(a => {
+    const o=document.createElement('option'); o.value=a; o.textContent=a;
+    el('selArea').appendChild(o);
+  });
+});
+
+function tab(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  el('panel-'+id).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>{
+    if(b.getAttribute('onclick').includes(id)) b.classList.add('active');
+  });
+}
+
+function reset(){
+  el('selArea').value='';
+  el('selTema').innerHTML='<option value="">Selecione o tema</option>';
+  el('selTema').disabled=true;
+  el('selSub').innerHTML='<option value="">Todos os subtemas</option>';
+  el('selSub').disabled=true;
+  clearAll();
+}
+
+function onArea(){
+  const area=el('selArea').value;
+  el('selTema').innerHTML='<option value="">Selecione o tema</option>';
+  el('selSub').innerHTML='<option value="">Todos os subtemas</option>';
+  el('selTema').disabled=!area; el('selSub').disabled=true;
+  if(area){
+    sortedTemas(area).forEach(t=>{
+      const o=document.createElement('option'); o.value=t; o.textContent=t;
+      el('selTema').appendChild(o);
+    });
+    updateGeral(area);
+    updateRanking(area);
+    updateAlerts(area);
+    updateHero(area);
+    clearRaioX(); clearQ();
+  } else { clearAll(); }
+}
+
+function onTema(){
+  const area=el('selArea').value, tema=el('selTema').value;
+  el('selSub').innerHTML='<option value="">Todos os subtemas</option>';
+  el('selSub').disabled=!tema;
+  if(area&&tema){
+    H[area][tema].forEach(s=>{
+      const o=document.createElement('option'); o.value=s; o.textContent=s;
+      el('selSub').appendChild(o);
+    });
+    document.getElementById('card-subbar').style.display='block';
+    tab('geral');
+    updateRaioX(area,tema,'');
+    updateQ(area,tema,'');
+    document.querySelectorAll('.rank-item').forEach(r=>{
+      r.classList.toggle('active', r.dataset.tema===tema);
+    });
+  } else { clearRaioX(); clearQ(); tab('geral'); }
+}
+
+function onSub(){
+  const area=el('selArea').value, tema=el('selTema').value, sub=el('selSub').value;
+  if(area&&tema){ updateRaioX(area,tema,sub); updateQ(area,tema,sub); }
+}
+
+let anosAtivos = [];
+
+function getActiveYears(){ return anosAtivos.length ? anosAtivos : YRS; }
+
+function initAnos(){
+  anosAtivos = [];
+  const wrap = el('anosBtns');
+  if(!wrap) return;
+  wrap.innerHTML = '';
+  YRS.forEach(y=>{
+    const b = document.createElement('button');
+    b.className='ano-btn active'; b.textContent=y; b.dataset.ano=y;
+    b.onclick = function(){ toggleAno(this, y); };
+    wrap.appendChild(b);
+  });
+}
+
+function toggleAno(btn, ano){
+  const idx = anosAtivos.indexOf(ano);
+  if(idx === -1){
+    anosAtivos.push(ano);
+    btn.classList.add('active');
+  } else {
+    if(anosAtivos.length === 1) return;
+    anosAtivos.splice(idx,1);
+    btn.classList.remove('active');
+  }
+  rerender();
+}
+
+function resetAnos(){
+  anosAtivos = [];
+  document.querySelectorAll('.ano-btn').forEach(b=>b.classList.add('active'));
+  rerender();
+}
+
+function rerender(){
+  const area=el('selArea').value, tema=el('selTema').value, sub=el('selSub').value;
+  if(!area) return;
+  updateGeral(area); updateRanking(area); updateAlerts(area);
+  if(tema){ updateRaioX(area,tema,sub); updateQ(area,tema,sub); }
+}
+
+function temaTotal(area,tema){
+  return getActiveYears().reduce((s,y)=>s+(TS[area+'|||'+tema]?.[y]||0),0);
+}
+function subTotal(sub){
+  return getActiveYears().reduce((s,y)=>s+(SS[sub]?.[y]||0),0);
+}
+
+function sortedTemas(area){
+  return Object.keys(H[area]).sort((a,b)=>temaTotal(area,b)-temaTotal(area,a));
+}
+
+
+
+function updateHero(area){
+  const top=sortedTemas(area)[0];
+  txt('heroNum', temaTotal(area,top));
+  txt('heroLbl', top+' · '+area.split(' ')[0]);
+}
+
+// --- GERAL ---
+function updateGeral(area){
+  let temas=sortedTemas(area);
+  let data=temas.map(t=>temaTotal(area,t));
+  if(sortState['temas']==='asc'){
+    const pairs=temas.map((t,i)=>({t,d:data[i]})).sort((a,b)=>a.d-b.d);
+    temas=pairs.map(p=>p.t); data=pairs.map(p=>p.d);
+  }
+  const total=data.reduce((a,b)=>a+b,0);
+  txt('b-temas', total+' questões total');
+  hide('e-temas'); show('c-temas'); dc('temas');
+  el('c-temas').style.height = Math.max(300, temas.length * 36) + 'px';
+  charts['temas']=new Chart(el('c-temas'),{
+    type:'bar',
+    data:{labels:temas,datasets:[{data,backgroundColor:'#4f9cf9',borderRadius:4,borderSkipped:false}]},
+    options:{
+      indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.parsed.x} questões`}}},
+      scales:{
+        x:{grid:{color:'rgba(37,46,64,0.8)'},ticks:{color:'#5a6a88'}},
+        y:{grid:{display:false},ticks:{color:'#e8edf5',font:{size:12},autoSkip:false}}
+      },
+      onClick:(e,els)=>{
+        if(els.length>0){
+          const t=temas[els[0].index];
+          el('selTema').value=t; onTema();
+        }
+      }
+    }
+  });
+
+  // Area line
+  const ldata=getActiveYears().map(y=>AY[area]?.[y]||0);
+  txt('b-arealine', ldata.reduce((a,b)=>a+b,0)+' questões');
+  /* bloqueado no plano básico */ return;
+  charts['arealine']=new Chart(el('c-arealine'),{
+    type:'line',
+    data:{labels:getActiveYears(),datasets:[{data:ldata,borderColor:'#f97316',backgroundColor:'rgba(249,115,22,0.08)',borderWidth:2,pointBackgroundColor:'#f97316',pointRadius:4,fill:true,tension:0.3}]},
+    options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.parsed.y} questões`}}},scales:{x:{grid:{color:'rgba(37,46,64,0.8)'},ticks:{color:'#5a6a88'}},y:{grid:{color:'rgba(37,46,64,0.8)'},ticks:{color:'#5a6a88',stepSize:1},min:0}}}
+  });
+
+  // Top5 recentes
+  const top5=sortedTemas(area).slice(0,5).reverse();
+  const t5d=top5.map(t=>REC.reduce((s,y)=>s+(TS[area+'|||'+t]?.[y]||0),0));
+  /* bloqueado no plano básico */ return;
+  el('c-top5').style.height = Math.max(180, top5.length * 40) + 'px';
+  charts['top5']=new Chart(el('c-top5'),{
+    type:'bar',
+    data:{labels:top5,datasets:[{data:t5d,backgroundColor:t5d.map((_,i)=>`rgba(167,139,250,${0.4+i/top5.length*0.6})`),borderRadius:4,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.parsed.x} questões`}}},scales:{x:{grid:{color:'rgba(37,46,64,0.8)'},ticks:{color:'#5a6a88'}},y:{grid:{display:false},ticks:{color:'#e8edf5',font:{size:12},autoSkip:false}}}}
+  });
+}
+
+// --- RANKING ---
+function updateRanking(area){
+  const sorted=sortedTemas(area).map((t,i)=>({t,total:temaTotal(area,t),i}));
+  el('rankList').innerHTML='';
+  sorted.forEach((item,i)=>{
+    const d=document.createElement('div');
+    d.className='rank-item'; d.dataset.tema=item.t;
+    d.innerHTML=`<span class="rn">#${i+1}</span><span class="rname">${item.t}</span><span class="rcount">${item.total}</span>`;
+    d.onclick=()=>{ el('selTema').value=item.t; onTema(); };
+    el('rankList').appendChild(d);
+  });
+}
+
+// --- ALERTS ---
+function updateAlerts(area){ return; // bloqueado no plano básico
+  const temas=Object.keys(H[area]);
+  const trends=temas.map(t=>{
+    const rec=REC.reduce((s,y)=>s+(TS[area+'|||'+t]?.[y]||0),0)/REC.length;
+    const old=OLD.reduce((s,y)=>s+(TS[area+'|||'+t]?.[y]||0),0)/OLD.length;
+    return {t,delta:rec-old};
+  }).sort((a,b)=>b.delta-a.delta);
+
+  const hot=trends.filter(x=>x.delta>0.3).slice(0,4);
+  const cold=trends.filter(x=>x.delta<-0.3).slice(0,4);
+
+  el('alertsHot').innerHTML='';
+  if(hot.length===0){el('alertsHot').innerHTML='<div class="sb-empty">Nenhum tema em alta expressiva.</div>';}
+  else hot.forEach(x=>{
+    const d=document.createElement('div'); d.className='alert-item hot';
+    d.innerHTML=`<span class="aicon">🔥</span><div><div class="atema">${x.t}</div><div class="adesc">+${x.delta.toFixed(1)} q/prova vs histórico</div></div>`;
+    d.onclick=()=>{ el('selTema').value=x.t; onTema(); };
+    el('alertsHot').appendChild(d);
+  });
+
+  el('alertsCold').innerHTML='';
+  if(cold.length===0){el('alertsCold').innerHTML='<div class="sb-empty">Nenhum tema em declínio marcado.</div>';}
+  else cold.forEach(x=>{
+    const d=document.createElement('div'); d.className='alert-item cold';
+    d.innerHTML=`<span class="aicon">🧊</span><div><div class="atema">${x.t}</div><div class="adesc">${x.delta.toFixed(1)} q/prova vs histórico</div></div>`;
+    d.onclick=()=>{ el('selTema').value=x.t; onTema(); };
+    el('alertsCold').appendChild(d);
+  });
+}
+
+// --- RAIO-X ---
+function updateRaioX(area,tema,sub){
+  const key=area+'|||'+tema;
+  let subs=[...H[area][tema]];
+  let bdata=subs.map(s=>subTotal(s));
+  // Filtrar subtemas sem questões
+  const nonZero=subs.map((s,i)=>({s,d:bdata[i]})).filter(p=>p.d>0).sort((a,b)=>sortState['subbar']==='asc'?a.d-b.d:b.d-a.d);
+  subs=nonZero.map(p=>p.s); bdata=nonZero.map(p=>p.d);
+  txt('b-subbar',bdata.reduce((a,b)=>a+b,0)+' questões (2026)');
+  hide('e-subbar'); show('c-subbar'); dc('subbar');
+  el('c-subbar').style.height = Math.max(200, subs.length * 36) + 'px';
+  charts['subbar']=new Chart(el('c-subbar'),{
+    type:'bar',
+    data:{labels:subs,datasets:[{data:bdata,backgroundColor:sub?subs.map(s=>s===sub?'#4f9cf9':'rgba(79,156,249,0.18)'):'#4f9cf9',borderRadius:4,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.parsed.x} questões`}}},scales:{x:{grid:{color:'rgba(37,46,64,0.8)'},ticks:{color:'#5a6a88'}},y:{grid:{display:false},ticks:{color:'#e8edf5',font:{size:12},autoSkip:false}}},onClick:(e,els)=>{if(els.length>0){const s=subs[els[0].index];el('selSub').value=s;onSub();}}}
+  });
+
+  const ldata=sub?getActiveYears().map(y=>SS[sub]?.[y]||0):getActiveYears().map(y=>TS[key]?.[y]||0);
+  txt('b-line',ldata.reduce((a,b)=>a+b,0)+' questões no período');
+  el('d-line').textContent=sub?`Evolução de "${sub}"`:`Total de "${tema}" por ano`;
+  /* bloqueado no plano básico */ return;
+  charts['line']=new Chart(el('c-line'),{
+    type:'line',
+    data:{labels:getActiveYears(),datasets:[{data:ldata,borderColor:'#f97316',backgroundColor:'rgba(249,115,22,0.08)',borderWidth:2.5,pointBackgroundColor:'#f97316',pointRadius:5,fill:true,tension:0.3}]},
+    options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.parsed.y} questões`}}},scales:{x:{grid:{color:'rgba(37,46,64,0.8)'},ticks:{color:'#5a6a88'}},y:{grid:{color:'rgba(37,46,64,0.8)'},ticks:{color:'#5a6a88',stepSize:1},min:0}}}
+  });
+}
+
+// --- QUESTÕES ---
+function updateQ(area,tema,sub){
+  let qs;
+  // Always start from the area+tema scope to avoid cross-area contamination
+  const temaQs = QT[area+'|||'+tema]||[];
+  if(sub){ qs=temaQs.filter(q=>q.subtema===sub); }
+  else { qs=temaQs; }
+  qs=qs.slice().sort((a,b)=>a.id.localeCompare(b.id,undefined,{numeric:true}));
+  txt('b-qtd', qs.length+' questão'+(qs.length!==1?'es':''));
+  const grid=el('qList');
+  grid.innerHTML='';
+  if(qs.length===0){
+    grid.innerHTML='<div class="q-empty">Nenhuma questão encontrada.</div>'; return;
+  }
+  qs.forEach(q=>{
+    const d=document.createElement('div'); d.className='q-row';
+    d.innerHTML=`<div class="q-id">${q.id}</div><div><div class="q-assunto">${q.assunto}</div><div class="q-sub">${sub?q.tema:q.subtema}</div></div>`;
+    grid.appendChild(d);
+  });
+}
+
+// --- CLEAR ---
+function clearRaioX(){
+  var cs=document.getElementById('card-subbar'); if(cs) cs.style.display='none';
+  ['subbar','line'].forEach(dc);
+  ['e-subbar','e-line'].forEach(id=>el(id).style.display='flex');
+  ['c-subbar','c-line'].forEach(id=>hide(id));
+  txt('b-subbar','Selecione um tema'); txt('b-line','—');
+}
+function clearQ(){
+  el('qList').innerHTML='<div class="q-empty">Selecione uma Área e Tema para listar as questões.</div>';
+  txt('b-qtd','Selecione um tema');
+}
+function clearGeral(){
+  ['temas','arealine','top5'].forEach(dc);
+  ['e-temas','e-arealine','e-top5'].forEach(id=>el(id).style.display='flex');
+  ['c-temas','c-arealine','c-top5'].forEach(id=>hide(id));
+  txt('b-temas','Selecione uma área'); txt('b-arealine','—');
+}
+function clearAll(){
+  clearGeral(); clearRaioX(); clearQ();
+  el('rankList').innerHTML='<div class="sb-empty">Selecione uma área.</div>';
+  el('alertsHot').innerHTML='<div class="sb-empty">Selecione uma área.</div>';
+  el('alertsCold').innerHTML='<div class="sb-empty">Selecione uma área.</div>';
+  txt('heroNum','—'); txt('heroLbl','tema mais cobrado');
+}
+
+</script>
+</body>
+</html>
