@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMP-PR 2026 — Análise Completa da Prova</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,900;1,300;1,600;1,900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f8f6f1;
+  --ink: #1a1814;
+  --ink2: #2e2b25;
+  --muted: #7a7468;
+  --rule: #ddd9d0;
+  --accent: #c8392b;
+  --blue: #1a4a8a;
+  --green: #1a6a3a;
+  --gold: #b8860b;
+  --surface: #ffffff;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif; }
+
+/* CAPA */
+.cover {
+  background:var(--ink);
+  min-height:100vh;
+  display:grid;
+  grid-template-rows:1fr auto;
+  padding:80px 80px 60px;
+  position:relative;
+  overflow:hidden;
+}
+.cover::before {
+  content:'';
+  position:absolute;
+  top:-200px; right:-200px;
+  width:700px; height:700px;
+  background:radial-gradient(circle, rgba(200,57,43,0.15) 0%, transparent 70%);
+  pointer-events:none;
+}
+.cover-top { display:flex; flex-direction:column; justify-content:center; }
+.cover-badge {
+  font-family:'DM Mono',monospace;
+  font-size:11px; letter-spacing:0.2em; text-transform:uppercase;
+  color:var(--accent); margin-bottom:32px;
+  display:flex; align-items:center; gap:12px;
+}
+.cover-badge::after { content:''; flex:1; height:1px; background:rgba(200,57,43,0.3); max-width:200px; }
+.cover h1 {
+  font-family:'Fraunces',serif;
+  font-size:88px; font-weight:900; line-height:0.95;
+  color:#fff; letter-spacing:-0.04em; margin-bottom:24px;
+}
+.cover h1 em { color:var(--accent); font-style:italic; }
+.cover-sub {
+  font-size:18px; color:rgba(255,255,255,0.5);
+  font-weight:300; max-width:500px; line-height:1.6;
+  border-left:3px solid var(--accent); padding-left:20px;
+}
+.cover-stats {
+  display:grid; grid-template-columns:repeat(4,1fr);
+  gap:1px; background:rgba(255,255,255,0.08);
+  border-top:1px solid rgba(255,255,255,0.08);
+  padding-top:32px; margin-top:60px;
+}
+.cs { padding:20px 0; }
+.cs-num {
+  font-family:'Fraunces',serif;
+  font-size:42px; font-weight:900; color:#fff; line-height:1;
+}
+.cs-lbl { font-size:12px; color:rgba(255,255,255,0.4); margin-top:6px; letter-spacing:0.04em; }
+
+/* SECTIONS */
+.section {
+  max-width:1100px; margin:0 auto;
+  padding:80px 60px;
+  border-bottom:1px solid var(--rule);
+}
+.section-eyebrow {
+  font-family:'DM Mono',monospace;
+  font-size:10px; letter-spacing:0.2em; text-transform:uppercase;
+  color:var(--accent); margin-bottom:16px;
+  display:flex; align-items:center; gap:12px;
+}
+.section-eyebrow::after { content:''; flex:1; height:1px; background:var(--rule); }
+.section h2 {
+  font-family:'Fraunces',serif;
+  font-size:42px; font-weight:700; letter-spacing:-0.02em;
+  color:var(--ink); margin-bottom:8px; line-height:1.1;
+}
+.section-sub { font-size:15px; color:var(--muted); margin-bottom:48px; line-height:1.6; }
+
+/* AREA CARDS */
+.areas-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:16px; margin-bottom:48px; }
+.area-card {
+  background:var(--surface); border:1px solid var(--rule);
+  border-radius:8px; padding:20px 16px; text-align:center;
+  transition:transform 0.15s, box-shadow 0.15s;
+}
+.area-card:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.08); }
+.area-icon { font-size:28px; margin-bottom:10px; }
+.area-name { font-size:11px; font-weight:600; color:var(--ink); margin-bottom:6px; line-height:1.3; }
+.area-count {
+  font-family:'Fraunces',serif;
+  font-size:32px; font-weight:900; color:var(--accent); line-height:1;
+}
+.area-pct { font-size:11px; color:var(--muted); margin-top:4px; }
+
+/* CHARTS */
+.chart-row { display:grid; grid-template-columns:1fr 1fr; gap:32px; margin-bottom:32px; }
+.chart-single { margin-bottom:32px; }
+.chart-card {
+  background:var(--surface); border:1px solid var(--rule);
+  border-radius:8px; padding:28px;
+}
+.chart-title {
+  font-family:'Fraunces',serif;
+  font-size:18px; font-weight:600; color:var(--ink); margin-bottom:4px;
+}
+.chart-desc { font-size:12px; color:var(--muted); margin-bottom:20px; }
+canvas { max-height:320px; }
+
+/* QUESTOES TABLE */
+.q-section { margin-bottom:48px; }
+.q-area-title {
+  font-family:'Fraunces',serif;
+  font-size:22px; font-weight:700; color:var(--ink);
+  margin-bottom:4px; padding-bottom:12px;
+  border-bottom:2px solid var(--ink);
+  display:flex; align-items:baseline; justify-content:space-between;
+}
+.q-area-count {
+  font-family:'DM Mono',monospace;
+  font-size:12px; color:var(--muted);
+}
+.q-table { width:100%; border-collapse:collapse; margin-bottom:32px; font-size:13px; }
+.q-table th {
+  font-family:'DM Mono',monospace;
+  font-size:9px; letter-spacing:0.14em; text-transform:uppercase;
+  color:var(--muted); padding:8px 12px; text-align:left;
+  border-bottom:1px solid var(--rule); background:var(--bg);
+}
+.q-table td { padding:10px 12px; border-bottom:1px solid var(--rule); vertical-align:top; }
+.q-table tr:hover td { background:rgba(200,57,43,0.03); }
+.q-num {
+  font-family:'DM Mono',monospace;
+  font-size:11px; color:var(--accent); font-weight:500; white-space:nowrap;
+}
+.q-tema { font-weight:500; color:var(--ink); }
+.q-subtema { color:var(--muted); font-size:12px; }
+.q-assunto { color:var(--ink2); line-height:1.4; }
+
+/* INSIGHTS */
+.insights-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; }
+.insight-card {
+  background:var(--surface); border:1px solid var(--rule);
+  border-radius:8px; padding:24px;
+  border-top:3px solid var(--accent);
+}
+.insight-icon { font-size:24px; margin-bottom:12px; }
+.insight-title { font-family:'Fraunces',serif; font-size:16px; font-weight:600; color:var(--ink); margin-bottom:8px; }
+.insight-text { font-size:13px; color:var(--muted); line-height:1.6; }
+
+/* FOOTER */
+footer {
+  background:var(--ink);
+  padding:40px 60px;
+  text-align:center;
+}
+.footer-brand {
+  font-family:'Fraunces',serif;
+  font-size:20px; font-weight:700; color:#fff; margin-bottom:8px;
+}
+.footer-brand em { color:var(--accent); font-style:italic; }
+.footer-sub { font-size:12px; color:rgba(255,255,255,0.3); letter-spacing:0.06em; }
+
+@media print {
+  .cover { min-height:auto; page-break-after:always; }
+  .section { page-break-inside:avoid; }
+}
+</style>
+</head>
+<body>
+
+<!-- CAPA -->
+<div class="cover">
+  <div class="cover-top">
+    <div class="cover-badge">Epidemiologia das Provas · AMP-PR</div>
+    <h1>Análise<br><em>Completa</em><br>2026</h1>
+    <div class="cover-sub">100 questões analisadas e classificadas por tema e subtema. Tudo que você precisa saber sobre a última prova da AMP-PR.</div>
+    <div class="cover-stats">
+      <div class="cs"><div class="cs-num">100</div><div class="cs-lbl">Questões analisadas</div></div>
+      <div class="cs"><div class="cs-num">5</div><div class="cs-lbl">Grandes áreas</div></div>
+      <div class="cs"><div class="cs-num">47</div><div class="cs-lbl">Temas cobrados</div></div>
+      <div class="cs"><div class="cs-num">2026</div><div class="cs-lbl">Edição da prova</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- VISÃO GERAL -->
+<div class="section">
+  <div class="section-eyebrow">Distribuição geral</div>
+  <h2>20 questões por área</h2>
+  <p class="section-sub">A AMP-PR 2026 manteve a distribuição clássica: 5 grandes áreas com 20 questões cada, totalizando 100 questões.</p>
+
+  <div class="areas-grid">
+    <div class="area-card">
+      <div class="area-icon">👶</div>
+      <div class="area-name">Pediatria</div>
+      <div class="area-count">20</div>
+      <div class="area-pct">20% da prova · Q1–20</div>
+    </div>
+    <div class="area-card">
+      <div class="area-icon">🤱</div>
+      <div class="area-name">Ginecologia & Obstetrícia</div>
+      <div class="area-count">20</div>
+      <div class="area-pct">20% da prova · Q21–40</div>
+    </div>
+    <div class="area-card">
+      <div class="area-icon">🫀</div>
+      <div class="area-name">Clínica Médica</div>
+      <div class="area-count">20</div>
+      <div class="area-pct">20% da prova · Q41–60</div>
+    </div>
+    <div class="area-card">
+      <div class="area-icon">🔪</div>
+      <div class="area-name">Cirurgia Geral</div>
+      <div class="area-count">20</div>
+      <div class="area-pct">20% da prova · Q61–80</div>
+    </div>
+    <div class="area-card">
+      <div class="area-icon">🏥</div>
+      <div class="area-name">Medicina Preventiva</div>
+      <div class="area-count">20</div>
+      <div class="area-pct">20% da prova · Q81–100</div>
+    </div>
+  </div>
+
+  <div class="chart-row">
+    <div class="chart-card">
+      <div class="chart-title">Temas mais cobrados — Pediatria</div>
+      <div class="chart-desc">Distribuição por tema principal (20 questões)</div>
+      <canvas id="chartPed"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Temas mais cobrados — Ginecologia & Obstetrícia</div>
+      <div class="chart-desc">Distribuição por tema principal (20 questões)</div>
+      <canvas id="chartGO"></canvas>
+    </div>
+  </div>
+  <div class="chart-row">
+    <div class="chart-card">
+      <div class="chart-title">Temas mais cobrados — Clínica Médica</div>
+      <div class="chart-desc">Distribuição por tema principal (20 questões)</div>
+      <canvas id="chartCM"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Temas mais cobrados — Cirurgia Geral</div>
+      <div class="chart-desc">Distribuição por tema principal (20 questões)</div>
+      <canvas id="chartCG"></canvas>
+    </div>
+  </div>
+  <div class="chart-single">
+    <div class="chart-card">
+      <div class="chart-title">Temas mais cobrados — Medicina Preventiva / Saúde Coletiva</div>
+      <div class="chart-desc">Distribuição por tema principal (20 questões)</div>
+      <canvas id="chartMP"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- INSIGHTS -->
+<div class="section" style="background:var(--ink);color:#fff;max-width:100%;padding:80px 0">
+  <div style="max-width:1100px;margin:0 auto;padding:0 60px">
+    <div class="section-eyebrow" style="color:var(--accent)">Destaques da prova</div>
+    <h2 style="color:#fff">O que a AMP-PR 2026 sinalizou</h2>
+    <p class="section-sub" style="color:rgba(255,255,255,0.5)">Padrões e tendências identificados na análise das 100 questões.</p>
+    <div class="insights-grid">
+      <div class="insight-card" style="background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);border-top-color:var(--accent)">
+        <div class="insight-icon">🏆</div>
+        <div class="insight-title" style="color:#fff">Cirurgia do Trauma lidera Cirurgia Geral</div>
+        <div class="insight-text" style="color:rgba(255,255,255,0.5)">5 questões dedicadas ao Trauma — E-FAST, trauma abdominal, trauma torácico. Maior concentração de qualquer tema em Cirurgia Geral na edição 2026.</div>
+      </div>
+      <div class="insight-card" style="background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);border-top-color:#4f9cf9">
+        <div class="insight-icon">🎯</div>
+        <div class="insight-title" style="color:#fff">APS domina Medicina Preventiva</div>
+        <div class="insight-text" style="color:rgba(255,255,255,0.5)">8 das 20 questões de Preventiva foram sobre Atenção Primária à Saúde — 40% da área. Fundamentos, saúde mental e condições crônicas foram os subfocos.</div>
+      </div>
+      <div class="insight-card" style="background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);border-top-color:#34d399">
+        <div class="insight-icon">❤️</div>
+        <div class="insight-title" style="color:#fff">Cardiologia concentra Clínica Médica</div>
+        <div class="insight-text" style="color:rgba(255,255,255,0.5)">4 questões de Cardiologia em Clínica Médica — Dislipidemia, IC, FA e IAM. Farmacologia cardiovascular foi o grande destaque da área.</div>
+      </div>
+      <div class="insight-card" style="background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);border-top-color:#f97316">
+        <div class="insight-icon">🤱</div>
+        <div class="insight-title" style="color:#fff">Parto e Puerpério lidera GO</div>
+        <div class="insight-text" style="color:rgba(255,255,255,0.5)">5 questões sobre Parto e Puerpério — hemorragia pós-parto, trabalho de parto prematuro, mastite e endometrite. Maior tema da área.</div>
+      </div>
+      <div class="insight-card" style="background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);border-top-color:#a78bfa">
+        <div class="insight-icon">👶</div>
+        <div class="insight-title" style="color:#fff">Pediatria distribuída em muitos temas</div>
+        <div class="insight-text" style="color:rgba(255,255,255,0.5)">16 temas diferentes em 20 questões — a maior diversidade temática da prova. Nenhum tema superou 2 questões, exigindo amplo domínio da especialidade.</div>
+      </div>
+      <div class="insight-card" style="background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);border-top-color:#f87171">
+        <div class="insight-icon">💊</div>
+        <div class="insight-title" style="color:#fff">Farmacologia em evidência</div>
+        <div class="insight-text" style="color:rgba(255,255,255,0.5)">Múltiplas questões focadas em condutas farmacológicas específicas — iSGLT2, ARNI, estatinas, tocolíticos. Conhecimento terapêutico foi cobrado em todas as áreas.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QUESTÕES POR ÁREA -->
+<div class="section">
+  <div class="section-eyebrow">Lista completa</div>
+  <h2>Todas as 100 questões</h2>
+  <p class="section-sub">Classificação completa por área, tema e subtema com o assunto abordado em cada questão.</p>
+
+  <!-- PEDIATRIA -->
+  <div class="q-section">
+    <div class="q-area-title">
+      👶 Pediatria — Q1 a Q20
+      <span class="q-area-count">20 questões · 16 temas</span>
+    </div>
+    <table class="q-table">
+      <thead><tr><th>Nº</th><th>Tema Principal</th><th>Subtema</th><th>Assunto cobrado</th></tr></thead>
+      <tbody>
+        <tr><td class="q-num">2026.1</td><td class="q-tema">Infectologia Pediátrica</td><td class="q-subtema">Conjuntivite Infecciosa</td><td class="q-assunto">Diagnóstico clínico — Síndrome Oculoglandular de Parinaud</td></tr>
+        <tr><td class="q-num">2026.2</td><td class="q-tema">Neonatologia</td><td class="q-subtema">Hérnia Diafragmática Congênita</td><td class="q-assunto">Características clínicas e prognóstico</td></tr>
+        <tr><td class="q-num">2026.3</td><td class="q-tema">Nefrologia Pediátrica</td><td class="q-subtema">Síndrome Nefrótica</td><td class="q-assunto">Indicação e riscos da infusão de albumina</td></tr>
+        <tr><td class="q-num">2026.4</td><td class="q-tema">Cirurgia Pediátrica</td><td class="q-subtema">Intussuscepção Intestinal</td><td class="q-assunto">Diagnóstico e apresentação clínica</td></tr>
+        <tr><td class="q-num">2026.5</td><td class="q-tema">Endocrinologia Pediátrica</td><td class="q-subtema">Cetoacidose Diabética (CAD)</td><td class="q-assunto">Manejo terapêutico e critérios de gravidade</td></tr>
+        <tr><td class="q-num">2026.6</td><td class="q-tema">Endocrinologia Pediátrica</td><td class="q-subtema">Baixa Estatura</td><td class="q-assunto">Investigação diagnóstica — exames iniciais vs GH</td></tr>
+        <tr><td class="q-num">2026.7</td><td class="q-tema">Neurologia Pediátrica</td><td class="q-subtema">Síndromes Neurocutâneas</td><td class="q-assunto">Diagnóstico clínico — Esclerose Tuberosa</td></tr>
+        <tr><td class="q-num">2026.8</td><td class="q-tema">Cardiologia Pediátrica</td><td class="q-subtema">Cardiopatias Congênitas</td><td class="q-assunto">Achado propedêutico — desdobramento fixo de B2 em CIA</td></tr>
+        <tr><td class="q-num">2026.9</td><td class="q-tema">Cirurgia Pediátrica</td><td class="q-subtema">Apendicite Aguda</td><td class="q-assunto">Apresentação clínica e conduta analgésica</td></tr>
+        <tr><td class="q-num">2026.10</td><td class="q-tema">Pneumologia Pediátrica</td><td class="q-subtema">Bronquiolite Viral Aguda</td><td class="q-assunto">Manejo terapêutico e uso de oxigenoterapia</td></tr>
+        <tr><td class="q-num">2026.11</td><td class="q-tema">Trauma Pediátrico</td><td class="q-subtema">Queimaduras na Infância</td><td class="q-assunto">Conduta inicial e ressuscitação volêmica — Fórmula de Parkland</td></tr>
+        <tr><td class="q-num">2026.12</td><td class="q-tema">Neurologia Pediátrica</td><td class="q-subtema">AVC na Criança</td><td class="q-assunto">Conduta e estabilização inicial na emergência</td></tr>
+        <tr><td class="q-num">2026.13</td><td class="q-tema">Puericultura</td><td class="q-subtema">Desenvolvimento Neuropsicomotor</td><td class="q-assunto">Marcos do desenvolvimento de 2 a 4 meses</td></tr>
+        <tr><td class="q-num">2026.14</td><td class="q-tema">Ética e Legislação</td><td class="q-subtema">Atestado de Óbito</td><td class="q-assunto">Regras em caso de morte violenta/suspeita</td></tr>
+        <tr><td class="q-num">2026.15</td><td class="q-tema">Toxicologia Pediátrica</td><td class="q-subtema">Intoxicações Exógenas</td><td class="q-assunto">Métodos de descontaminação e antídotos específicos</td></tr>
+        <tr><td class="q-num">2026.16</td><td class="q-tema">Nutrição Infantil</td><td class="q-subtema">Aleitamento Materno</td><td class="q-assunto">Orientações de técnica e manejo do aleitamento</td></tr>
+        <tr><td class="q-num">2026.17</td><td class="q-tema">Dermatologia Pediátrica</td><td class="q-subtema">Dermatite Seborreica</td><td class="q-assunto">Identificação do agente etiológico</td></tr>
+        <tr><td class="q-num">2026.18</td><td class="q-tema">Neonatologia</td><td class="q-subtema">Conjuntivite Neonatal</td><td class="q-assunto">Conduta terapêutica para conjuntivite gonocócica</td></tr>
+        <tr><td class="q-num">2026.19</td><td class="q-tema">Emergência Pediátrica</td><td class="q-subtema">PCR Pediátrica</td><td class="q-assunto">Técnica correta de compressão torácica em RCP</td></tr>
+        <tr><td class="q-num">2026.20</td><td class="q-tema">Alergia e Imunologia Pediátrica</td><td class="q-subtema">Alergia Alimentar</td><td class="q-assunto">Fisiopatologia e diagnóstico — FPIES vs IgE mediada</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- GO -->
+  <div class="q-section">
+    <div class="q-area-title">
+      🤱 Ginecologia & Obstetrícia — Q21 a Q40
+      <span class="q-area-count">20 questões · 10 temas</span>
+    </div>
+    <table class="q-table">
+      <thead><tr><th>Nº</th><th>Tema Principal</th><th>Subtema</th><th>Assunto cobrado</th></tr></thead>
+      <tbody>
+        <tr><td class="q-num">2026.21</td><td class="q-tema">Patologias da Gestação</td><td class="q-subtema">Síndromes Hipertensivas</td><td class="q-assunto">Diagnóstico e conduta na Pré-eclâmpsia com sinais de gravidade</td></tr>
+        <tr><td class="q-num">2026.22</td><td class="q-tema">Patologias da Gestação</td><td class="q-subtema">Diabetes Gestacional</td><td class="q-assunto">Diagnóstico e conduta terapêutica inicial</td></tr>
+        <tr><td class="q-num">2026.23</td><td class="q-tema">Patologias da Gestação</td><td class="q-subtema">ITU na Gestação</td><td class="q-assunto">Manejo da Bacteriúria Assintomática e profilaxia para GBS</td></tr>
+        <tr><td class="q-num">2026.24</td><td class="q-tema">Patologias da Gestação</td><td class="q-subtema">Infecções Congênitas</td><td class="q-assunto">Interpretação sorológica e conduta em Toxoplasmose</td></tr>
+        <tr><td class="q-num">2026.25</td><td class="q-tema">Pré-Natal e Fisiologia</td><td class="q-subtema">Imunização na Gestação</td><td class="q-assunto">Calendário vacinal da gestante — indicação dTpa</td></tr>
+        <tr><td class="q-num">2026.26</td><td class="q-tema">Parto e Puerpério</td><td class="q-subtema">Trabalho de Parto Prematuro</td><td class="q-assunto">Escolha e contraindicação de tocolíticos</td></tr>
+        <tr><td class="q-num">2026.27</td><td class="q-tema">Pré-Natal e Fisiologia</td><td class="q-subtema">Vitalidade Fetal</td><td class="q-assunto">Conduta obstétrica e indicação de indução — Índice de Bishop</td></tr>
+        <tr><td class="q-num">2026.28</td><td class="q-tema">Parto e Puerpério</td><td class="q-subtema">Hemorragia Pós-Parto</td><td class="q-assunto">Conduta sequencial e uterotônicos</td></tr>
+        <tr><td class="q-num">2026.29</td><td class="q-tema">Parto e Puerpério</td><td class="q-subtema">Assistência ao Parto</td><td class="q-assunto">Princípios da assistência ao parto humanizado</td></tr>
+        <tr><td class="q-num">2026.30</td><td class="q-tema">Parto e Puerpério</td><td class="q-subtema">Puerpério — Mastite</td><td class="q-assunto">Diagnóstico e manejo da mastite puerperal</td></tr>
+        <tr><td class="q-num">2026.31</td><td class="q-tema">Sangramentos</td><td class="q-subtema">Doença Trofoblástica Gestacional</td><td class="q-assunto">Diagnóstico histopatológico — Mola hidatiforme completa</td></tr>
+        <tr><td class="q-num">2026.32</td><td class="q-tema">Parto e Puerpério</td><td class="q-subtema">Puerpério — Endometrite</td><td class="q-assunto">Quadro clínico e diagnóstico de endometrite</td></tr>
+        <tr><td class="q-num">2026.33</td><td class="q-tema">Endócrina e Anticoncepção</td><td class="q-subtema">Anticoncepção / TH</td><td class="q-assunto">Indicação e esquema de Terapia Hormonal (TH)</td></tr>
+        <tr><td class="q-num">2026.34</td><td class="q-tema">Uroginecologia</td><td class="q-subtema">Síndrome da Bexiga Hiperativa</td><td class="q-assunto">Diagnóstico de Síndrome da Bexiga Hiperativa</td></tr>
+        <tr><td class="q-num">2026.35</td><td class="q-tema">Saúde da Mulher</td><td class="q-subtema">Ética e Legislação</td><td class="q-assunto">Princípio da autonomia e consentimento informado</td></tr>
+        <tr><td class="q-num">2026.36</td><td class="q-tema">Mastologia</td><td class="q-subtema">CA de Mama</td><td class="q-assunto">Tratamento do Câncer de Mama Triplo Negativo</td></tr>
+        <tr><td class="q-num">2026.37</td><td class="q-tema">Endócrina e Anticoncepção</td><td class="q-subtema">Sangramento Uterino Anormal</td><td class="q-assunto">Investigação de sangramento pós-menopausa — biópsia endometrial</td></tr>
+        <tr><td class="q-num">2026.38</td><td class="q-tema">Oncologia</td><td class="q-subtema">Câncer de Colo de Útero</td><td class="q-assunto">Conduta em CCU IB1/IB2 — cirurgia radical</td></tr>
+        <tr><td class="q-num">2026.39</td><td class="q-tema">Infecções e Doenças Benignas</td><td class="q-subtema">Vulvovaginites</td><td class="q-assunto">Diagnóstico e tratamento de Tricomoníase</td></tr>
+        <tr><td class="q-num">2026.40</td><td class="q-tema">Endócrina e Anticoncepção</td><td class="q-subtema">SOP</td><td class="q-assunto">Critérios de Rotterdam e diagnóstico diferencial</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CM -->
+  <div class="q-section">
+    <div class="q-area-title">
+      🫀 Clínica Médica — Q41 a Q60
+      <span class="q-area-count">20 questões · 11 temas</span>
+    </div>
+    <table class="q-table">
+      <thead><tr><th>Nº</th><th>Tema Principal</th><th>Subtema</th><th>Assunto cobrado</th></tr></thead>
+      <tbody>
+        <tr><td class="q-num">2026.41</td><td class="q-tema">Reumatologia</td><td class="q-subtema">Doenças Osteoarticulares</td><td class="q-assunto">Diagnóstico clínico de Tenossinovite de De Quervain</td></tr>
+        <tr><td class="q-num">2026.42</td><td class="q-tema">Endocrinologia</td><td class="q-subtema">Osteoporose</td><td class="q-assunto">Tratamento medicamentoso pós-fratura patológica</td></tr>
+        <tr><td class="q-num">2026.43</td><td class="q-tema">Cardiologia</td><td class="q-subtema">Dislipidemia no Diabetes</td><td class="q-assunto">Indicação e meta para uso de estatinas</td></tr>
+        <tr><td class="q-num">2026.44</td><td class="q-tema">Endocrinologia</td><td class="q-subtema">Hipertireoidismo</td><td class="q-assunto">Manejo da Doença de Graves na gestação</td></tr>
+        <tr><td class="q-num">2026.45</td><td class="q-tema">Nefrologia</td><td class="q-subtema">Nefropatia Diabética</td><td class="q-assunto">Indicação de inibidores de SGLT-2</td></tr>
+        <tr><td class="q-num">2026.46</td><td class="q-tema">Neurologia</td><td class="q-subtema">AVC Isquêmico</td><td class="q-assunto">Critérios para trombólise no Wake-up stroke — Mismatch</td></tr>
+        <tr><td class="q-num">2026.47</td><td class="q-tema">Cardiologia</td><td class="q-subtema">Insuficiência Cardíaca</td><td class="q-assunto">Otimização terapêutica — iSGLT2 e ARNI</td></tr>
+        <tr><td class="q-num">2026.48</td><td class="q-tema">Cardiologia</td><td class="q-subtema">Fibrilação Atrial</td><td class="q-assunto">Conduta em taquiarritmia instável — Cardioversão</td></tr>
+        <tr><td class="q-num">2026.49</td><td class="q-tema">Cardiologia</td><td class="q-subtema">IAM sem supra ST</td><td class="q-assunto">Indicação de estratégia invasiva</td></tr>
+        <tr><td class="q-num">2026.50</td><td class="q-tema">Infectologia</td><td class="q-subtema">Febre de Origem Obscura</td><td class="q-assunto">Critérios diagnósticos e etiologias associadas</td></tr>
+        <tr><td class="q-num">2026.51</td><td class="q-tema">Dermatologia</td><td class="q-subtema">CA de Pele Não Melanoma</td><td class="q-assunto">Características clínicas e epidemiologia</td></tr>
+        <tr><td class="q-num">2026.52</td><td class="q-tema">Hematologia</td><td class="q-subtema">Neoplasias Mieloproliferativas</td><td class="q-assunto">Apresentação e riscos em Trombocitemia / Policitemia</td></tr>
+        <tr><td class="q-num">2026.53</td><td class="q-tema">Oncologia</td><td class="q-subtema">Urgências Oncológicas</td><td class="q-assunto">Investigação e etiologia da Síndrome da VCS</td></tr>
+        <tr><td class="q-num">2026.54</td><td class="q-tema">Oncologia</td><td class="q-subtema">Síndromes Paraneoplásicas</td><td class="q-assunto">Quadro clínico — SIADH e Hipercalcemia</td></tr>
+        <tr><td class="q-num">2026.55</td><td class="q-tema">Infectologia</td><td class="q-subtema">Infecções em Imunodeprimidos</td><td class="q-assunto">Manejo e profilaxia em paciente oncológico com neutropenia</td></tr>
+        <tr><td class="q-num">2026.56</td><td class="q-tema">Hematologia</td><td class="q-subtema">Plaquetopenia</td><td class="q-assunto">Conduta na Trombocitopenia Induzida por Heparina (TIH)</td></tr>
+        <tr><td class="q-num">2026.57</td><td class="q-tema">Pneumologia</td><td class="q-subtema">Espirometria</td><td class="q-assunto">Interpretação de espirometria e características da doença</td></tr>
+        <tr><td class="q-num">2026.58</td><td class="q-tema">Pneumologia</td><td class="q-subtema">Dist. Respiratórios do Sono</td><td class="q-assunto">Fisiopatologia e diagnóstico da Síndrome de Hipoventilação</td></tr>
+        <tr><td class="q-num">2026.59</td><td class="q-tema">Medicina Intensiva</td><td class="q-subtema">SARA / TRALI</td><td class="q-assunto">Diagnóstico e suspeita de TRALI vs SARA</td></tr>
+        <tr><td class="q-num">2026.60</td><td class="q-tema">Medicina Intensiva</td><td class="q-subtema">Choque e Hemodinâmica</td><td class="q-assunto">Reconhecimento de estado de choque e mecanismos compensatórios</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CG -->
+  <div class="q-section">
+    <div class="q-area-title">
+      🔪 Cirurgia Geral — Q61 a Q80
+      <span class="q-area-count">20 questões · 12 temas</span>
+    </div>
+    <table class="q-table">
+      <thead><tr><th>Nº</th><th>Tema Principal</th><th>Subtema</th><th>Assunto cobrado</th></tr></thead>
+      <tbody>
+        <tr><td class="q-num">2026.61</td><td class="q-tema">Cuidados Pós-Operatórios</td><td class="q-subtema">IRA Pós-op</td><td class="q-assunto">Avaliação de volemia e diagnóstico diferencial</td></tr>
+        <tr><td class="q-num">2026.62</td><td class="q-tema">Cuidados Pós-Operatórios</td><td class="q-subtema">Coagulopatias</td><td class="q-assunto">Interpretação de Tromboelastografia (TEG) e conduta transfusional</td></tr>
+        <tr><td class="q-num">2026.63</td><td class="q-tema">Cuidados Pós-Operatórios</td><td class="q-subtema">Transfusão Sanguínea</td><td class="q-assunto">Critérios e gatilhos transfusionais pós-operatórios</td></tr>
+        <tr><td class="q-num">2026.64</td><td class="q-tema">Medicina Intensiva</td><td class="q-subtema">Paciente Crítico</td><td class="q-assunto">Controle glicêmico em UTI</td></tr>
+        <tr><td class="q-num">2026.65</td><td class="q-tema">Dermatologia</td><td class="q-subtema">Melanoma Cutâneo</td><td class="q-assunto">Conduta cirúrgica inicial — biópsia excisional</td></tr>
+        <tr><td class="q-num">2026.66</td><td class="q-tema">Bioética</td><td class="q-subtema">Cuidados Paliativos</td><td class="q-assunto">Manejo da futilidade terapêutica e decisão com familiares</td></tr>
+        <tr><td class="q-num">2026.67</td><td class="q-tema">Medicina Intensiva</td><td class="q-subtema">Via Aérea Avançada</td><td class="q-assunto">Critérios e indicações de Traqueostomia Precoce</td></tr>
+        <tr><td class="q-num">2026.68</td><td class="q-tema">Urologia</td><td class="q-subtema">Tumores Renais</td><td class="q-assunto">Abordagem cirúrgica em idoso frágil e avaliação pré-operatória</td></tr>
+        <tr><td class="q-num">2026.69</td><td class="q-tema">Cirurgia Hepatobiliar</td><td class="q-subtema">Pólipos Vesiculares</td><td class="q-assunto">Indicação cirúrgica — colecistectomia profilática</td></tr>
+        <tr><td class="q-num">2026.70</td><td class="q-tema">Oncologia Cirúrgica</td><td class="q-subtema">Cistos Pancreáticos</td><td class="q-assunto">Avaliação de risco e ressecção de Neoplasia Intraductal (IPMN)</td></tr>
+        <tr><td class="q-num">2026.71</td><td class="q-tema">Cirurgia Hepatobiliar</td><td class="q-subtema">Colelitíase</td><td class="q-assunto">Conduta em colelitíase sintomática</td></tr>
+        <tr><td class="q-num">2026.72</td><td class="q-tema">Cirurgia do Aparelho Digestivo</td><td class="q-subtema">Abdome Agudo Inflamatório</td><td class="q-assunto">Tratamento cirúrgico de escolha</td></tr>
+        <tr><td class="q-num">2026.73</td><td class="q-tema">Queimaduras</td><td class="q-subtema">Grande Queimado</td><td class="q-assunto">Fórmula de reposição volêmica — Parkland</td></tr>
+        <tr><td class="q-num">2026.74</td><td class="q-tema">Parede Abdominal</td><td class="q-subtema">Hérnias</td><td class="q-assunto">Fatores de risco para recidiva em herniorrafia umbilical</td></tr>
+        <tr><td class="q-num">2026.75</td><td class="q-tema">Gastroenterologia</td><td class="q-subtema">Doença Ulcerosa Péptica</td><td class="q-assunto">Tratamento erradicador de Helicobacter pylori</td></tr>
+        <tr><td class="q-num">2026.76</td><td class="q-tema">Cirurgia do Trauma</td><td class="q-subtema">E-FAST</td><td class="q-assunto">Janelas ultrassonográficas do E-FAST</td></tr>
+        <tr><td class="q-num">2026.77</td><td class="q-tema">Cirurgia do Trauma</td><td class="q-subtema">Trauma Abdominal</td><td class="q-assunto">Conduta em paciente instável com FAST positivo</td></tr>
+        <tr><td class="q-num">2026.78</td><td class="q-tema">Cirurgia do Trauma</td><td class="q-subtema">Trauma Abdominal</td><td class="q-assunto">Conduta cirúrgica na evisceração</td></tr>
+        <tr><td class="q-num">2026.79</td><td class="q-tema">Cirurgia do Trauma</td><td class="q-subtema">Trauma Torácico</td><td class="q-assunto">Indicação de Toracotomia de Urgência no hemotórax maciço</td></tr>
+        <tr><td class="q-num">2026.80</td><td class="q-tema">Cirurgia do Trauma</td><td class="q-subtema">Trauma Torácico</td><td class="q-assunto">Conduta inicial em pneumotórax aberto — curativo 3 pontas</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MP -->
+  <div class="q-section">
+    <div class="q-area-title">
+      🏥 Medicina Preventiva / Saúde Coletiva — Q81 a Q100
+      <span class="q-area-count">20 questões · 8 temas</span>
+    </div>
+    <table class="q-table">
+      <thead><tr><th>Nº</th><th>Tema Principal</th><th>Subtema</th><th>Assunto cobrado</th></tr></thead>
+      <tbody>
+        <tr><td class="q-num">2026.81</td><td class="q-tema">História das Políticas de Saúde</td><td class="q-subtema">Modelos de Saúde</td><td class="q-assunto">Características do modelo Bismarckiano vs Beveridgiano</td></tr>
+        <tr><td class="q-num">2026.82</td><td class="q-tema">Perfis e Indicadores Demográficos</td><td class="q-subtema">Determinantes Sociais</td><td class="q-assunto">Análise de iniquidades e desigualdade socioeconômica</td></tr>
+        <tr><td class="q-num">2026.83</td><td class="q-tema">Atenção Primária à Saúde</td><td class="q-subtema">Fundamentos da APS</td><td class="q-assunto">Definições históricas — Alma-Ata e papel da APS</td></tr>
+        <tr><td class="q-num">2026.84</td><td class="q-tema">A Evolução do SUS</td><td class="q-subtema">Lei 8.080/90</td><td class="q-assunto">Atribuições e escopo de atuação</td></tr>
+        <tr><td class="q-num">2026.85</td><td class="q-tema">Atenção Primária à Saúde</td><td class="q-subtema">Coordenação de Cuidados</td><td class="q-assunto">Conceito de Coordenação de Cuidados</td></tr>
+        <tr><td class="q-num">2026.86</td><td class="q-tema">Atenção Primária à Saúde</td><td class="q-subtema">Saúde Mental</td><td class="q-assunto">Abordagem e tratamento da Depressão leve/moderada</td></tr>
+        <tr><td class="q-num">2026.87</td><td class="q-tema">Atenção Primária à Saúde</td><td class="q-subtema">Condições Agudas</td><td class="q-assunto">Raciocínio clínico na tosse crônica — iECA</td></tr>
+        <tr><td class="q-num">2026.88</td><td class="q-tema">Atenção Primária à Saúde</td><td class="q-subtema">Saúde Mental e Cessação</td><td class="q-assunto">Estratégias de cessação e uso da bupropiona</td></tr>
+        <tr><td class="q-num">2026.89</td><td class="q-tema">Atenção Primária à Saúde</td><td class="q-subtema">Condições Crônicas</td><td class="q-assunto">Fisiopatologia da fome hedônica e fatores ambientais</td></tr>
+        <tr><td class="q-num">2026.90</td><td class="q-tema">Ética Médica e Documentação</td><td class="q-subtema">Declaração de Óbito</td><td class="q-assunto">Identificação correta da causa básica do óbito</td></tr>
+        <tr><td class="q-num">2026.91</td><td class="q-tema">Estudos Epidemiológicos</td><td class="q-subtema">Níveis de Evidência</td><td class="q-assunto">Estrutura da Pirâmide de Haynes — sumários e diretrizes</td></tr>
+        <tr><td class="q-num">2026.92</td><td class="q-tema">Níveis de Prevenção</td><td class="q-subtema">Prevenção Quaternária</td><td class="q-assunto">Manejo do excesso de exames — check-up exagerado</td></tr>
+        <tr><td class="q-num">2026.93</td><td class="q-tema">Níveis de Prevenção</td><td class="q-subtema">Prevenção Primária</td><td class="q-assunto">Abordagem relacional e educação sexual em adolescentes</td></tr>
+        <tr><td class="q-num">2026.94</td><td class="q-tema">Estatística de Testes Diagnósticos</td><td class="q-subtema">Valores Preditivos</td><td class="q-assunto">Interpretação do Valor Preditivo Positivo (VPP)</td></tr>
+        <tr><td class="q-num">2026.95</td><td class="q-tema">Estudos Epidemiológicos</td><td class="q-subtema">Risco e Associação</td><td class="q-assunto">Interpretação do Número Necessário para Tratar (NNT)</td></tr>
+        <tr><td class="q-num">2026.96</td><td class="q-tema">Estatística de Testes Diagnósticos</td><td class="q-subtema">Valores Preditivos</td><td class="q-assunto">Impacto da prevalência no VPP — Falso-positivos</td></tr>
+        <tr><td class="q-num">2026.97</td><td class="q-tema">Estudos Epidemiológicos</td><td class="q-subtema">Coleta de Dados</td><td class="q-assunto">Vantagens do autorrelato vs dados de prontuário</td></tr>
+        <tr><td class="q-num">2026.98</td><td class="q-tema">Atenção Primária à Saúde</td><td class="q-subtema">Saúde do Idoso</td><td class="q-assunto">Cuidados paliativos e decisão compartilhada em idosos</td></tr>
+        <tr><td class="q-num">2026.99</td><td class="q-tema">Atenção Primária à Saúde</td><td class="q-subtema">Risco Cardiovascular</td><td class="q-assunto">Interpretação de calculadoras de risco e aconselhamento</td></tr>
+        <tr><td class="q-num">2026.100</td><td class="q-tema">Atenção Primária à Saúde</td><td class="q-subtema">Condições Crônicas</td><td class="q-assunto">Manejo de Hipertensão Arterial — metas e terapia combinada</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-brand">Epidemiologia <em>das Provas</em></div>
+  <div class="footer-sub" style="margin-top:8px">AMP-PR 2026 · Análise exclusiva · epidemiologiadasprovas.com.br</div>
+</footer>
+
+<script>
+Chart.defaults.color = '#7a7468';
+Chart.defaults.font.family = 'DM Sans';
+
+const COLORS = ['#c8392b','#1a4a8a','#1a6a3a','#b8860b','#6a3a8a','#1a7a7a','#8a3a1a','#4a6a1a','#3a1a8a','#7a4a1a','#1a4a4a','#4a1a4a'];
+
+function barH(id, labels, data, color) {
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  ctx.style.height = Math.max(160, labels.length * 38) + 'px';
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{ data, backgroundColor: color || COLORS[0], borderRadius: 4, borderSkipped: false }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.parsed.x} questão${c.parsed.x > 1 ? 'ões' : ''}` } } },
+      scales: {
+        x: { grid: { color: '#eee8de' }, ticks: { color: '#7a7468', stepSize: 1 }, min: 0 },
+        y: { grid: { display: false }, ticks: { color: '#1a1814', font: { size: 12 }, autoSkip: false } }
+      }
+    }
+  });
+}
+
+// Pediatria
+barH('chartPed',
+  ['Neonatologia','Cirurgia Pediátrica','Endocrinologia Ped.','Neurologia Pediátrica','Infectologia Ped.','Cardiologia Ped.','Pneumologia Ped.','Trauma Pediátrico','Puericultura','Ética e Legislação','Toxicologia Ped.','Nutrição Infantil','Dermatologia Ped.','Emergência Ped.','Alergia e Imunologia','Nefrologia Ped.'],
+  [2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1], COLORS[0]
+);
+
+// GO
+barH('chartGO',
+  ['Parto e Puerpério','Patologias da Gestação','Endócrina e Anticoncepção','Pré-Natal e Fisiologia','Sangramentos','Uroginecologia','Saúde da Mulher','Mastologia','Oncologia','Infecções Benignas'],
+  [5,4,3,2,1,1,1,1,1,1], COLORS[1]
+);
+
+// CM
+barH('chartCM',
+  ['Cardiologia','Oncologia','Hematologia','Infectologia','Endocrinologia','Pneumologia','Medicina Intensiva','Reumatologia','Nefrologia','Neurologia','Dermatologia'],
+  [4,2,2,2,2,2,2,1,1,1,1], COLORS[2]
+);
+
+// CG
+barH('chartCG',
+  ['Cirurgia do Trauma','Cuidados Pós-Op.','Medicina Intensiva','Cirurgia Hepatobiliar','Dermatologia','Bioética','Urologia','Oncologia Cirúrgica','Cirurgia Dig.','Queimaduras','Parede Abdominal','Gastroenterologia'],
+  [5,3,2,2,1,1,1,1,1,1,1,1], COLORS[3]
+);
+
+// MP
+barH('chartMP',
+  ['Atenção Primária à Saúde','Estudos Epidemiológicos','Níveis de Prevenção','Estat. Testes Diagnósticos','Ética Médica','História Políticas Saúde','Perfis Demográficos','A Evolução do SUS'],
+  [8,3,2,2,1,1,1,1], COLORS[0]
+);
+</script>
+</body>
+</html>

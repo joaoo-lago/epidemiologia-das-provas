@@ -51,6 +51,26 @@ function doLogout() {
   document.getElementById('loginSenha').value = '';
 }
 
+// ── SELETOR DE PLANO ──
+function selectPlan(el, id) {
+  document.querySelectorAll('#plans-amp .plan').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  var cta = document.getElementById('plan-cta');
+  if (!cta) return;
+  cta.style.display = 'block';
+  var msgs = {
+    basico:   { label: '📊 Acessar análise gratuita →', href: 'analiseamp2026.html', blank: true },
+    essencial:{ label: '⭐ Adquirir Plano Essencial — R$ 87 →', href: '#', blank: false },
+    premium:  { label: '🏆 Adquirir Plano Premium — R$ 147 →', href: '#', blank: false }
+  };
+  var m = msgs[id];
+  if (!m) return;
+  cta.innerHTML = '<a href="' + m.href + '"' + (m.blank ? ' target="_blank"' : '') +
+    ' style="display:block;background:var(--red);color:#fff;font-family:\'IBM Plex Mono\',monospace;' +
+    'font-size:11px;letter-spacing:0.1em;text-transform:uppercase;padding:13px 18px;border-radius:2px;' +
+    'text-decoration:none;transition:background 0.15s">' + m.label + '</a>';
+}
+
 // ── SELETOR DE PROVA ──
 function selectProva(btn, id) {
   if (btn.classList.contains('disabled')) return;

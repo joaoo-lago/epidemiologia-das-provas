@@ -991,28 +991,29 @@ footer {
       </div>
 
       <div id="plans-amp" class="plans">
-        <div class="plan">
+        <div class="plan" onclick="selectPlan(this,'basico')" style="cursor:pointer">
           <div>
             <div class="plan-name">Plano Básico</div>
-            <div class="plan-desc">Análise da última prova (AMP-PR 2026)</div>
+            <div class="plan-desc">Análise completa da última prova (AMP-PR 2026)</div>
           </div>
-          <div class="plan-price">Grátis</div>
+          <div class="plan-price">Grátis<span class="plan-check">✓</span></div>
         </div>
-        <div class="plan featured">
+        <div class="plan featured" onclick="selectPlan(this,'essencial')" style="cursor:pointer">
           <div>
             <div class="plan-name">⭐ Plano Essencial</div>
             <div class="plan-desc">Últimas 5 provas · 2022–2026</div>
           </div>
-          <div class="plan-price">R$ 49<small>pagamento único</small></div>
+          <div class="plan-price">R$ 87<small>pagamento único</small><span class="plan-check">✓</span></div>
         </div>
-        <div class="plan">
+        <div class="plan" onclick="selectPlan(this,'premium')" style="cursor:pointer">
           <div>
-            <div class="plan-name">Plano Completo</div>
+            <div class="plan-name">🏆 Plano Premium</div>
             <div class="plan-desc">10 anos completos · 2017–2026</div>
           </div>
-          <div class="plan-price">R$ 89<small>pagamento único</small></div>
+          <div class="plan-price">R$ 147<small>pagamento único</small><span class="plan-check">✓</span></div>
         </div>
       </div>
+      <div id="plan-cta" style="display:none;margin-top:12px"></div>
 
       <div id="plans-soon" class="plans" style="display:none">
         <div class="plan" style="opacity:0.5;cursor:not-allowed;border-style:dashed">
@@ -1069,9 +1070,17 @@ footer {
           <h3>Bem-vindo de volta 👋</h3>
           <p>Plano Essencial · Últimas 5 provas · Válido até dez/2026</p>
         </div>
+        <a class="dash-card" href="analiseamp2026.html" target="_blank" style="cursor:pointer;text-decoration:none;color:inherit">
+          <div><div class="dc-title">📊 Análise AMP-PR 2026 — Gratuito</div><div class="dc-desc">100 questões classificadas · gráficos por área · acesso livre</div></div>
+          <div class="dc-arrow">→</div>
+        </a>
         <div class="dash-card" id="btnAbrirMapa" style="cursor:pointer">
           <div><div class="dc-title">🗺️ Mapa da Prova — AMP-PR</div><div class="dc-desc">Dashboard interativo · 2022–2026 · Ranking e alertas</div></div>
           <div class="dc-arrow">→</div>
+        </div>
+        <div class="dash-card" style="opacity:0.55;cursor:not-allowed;border-style:dashed">
+          <div><div class="dc-title">🏆 Mapa Premium — 10 anos</div><div class="dc-desc">2017–2026 · Disponível no Plano Premium (R$ 147)</div></div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)">Upgrade</div>
         </div>
         <button class="btn-logout btn-sair">Sair da conta</button>
       </div>
