@@ -603,5 +603,14 @@ function clearAll(){
 }
 
 </script>
+<script>
+/* antipirataria */
+document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+document.addEventListener('keydown', function(e){
+  var k = e.key ? e.key.toLowerCase() : '';
+  if ((e.ctrlKey || e.metaKey) && ['s','u','p','a'].includes(k)) e.preventDefault();
+  if (e.key === 'F12') e.preventDefault();
+});
+</script>
 </body>
 </html>

@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planos — Epidemiologia das Provas</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --ink:#0d2137;--ink2:#1a3a52;--paper:#f4fbf7;--paper2:#e8f5ee;
+  --rule:#b8d9c8;--muted:#5a7a6a;--green:#1a7a4a;--green2:#22a060;
+  --gold:#b8860b;--red:#c0392b;--surface:#ffffff;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:'Source Serif 4',serif;}
+
+/* ── MASTHEAD ── */
+.masthead{background:var(--ink);border-bottom:3px solid var(--green);}
+.mast-top{max-width:1280px;margin:0 auto;padding:22px 48px 18px;display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.07);}
+.mast-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:#fff;letter-spacing:-0.03em;}
+.mast-title em{color:var(--green);font-style:italic;}
+.mast-kicker{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-top:5px;}
+.mast-nav{display:flex;gap:0;max-width:1280px;margin:0 auto;padding:0 48px;}
+.mast-nav a{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.4);padding:13px 20px;text-decoration:none;border-bottom:3px solid transparent;transition:all 0.18s;}
+.mast-nav a:hover{color:#fff;}
+.mast-nav a.active{color:#fff;border-bottom-color:var(--green);}
+
+/* ── HERO ── */
+.hero{background:var(--ink2);padding:80px 48px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-150px;left:50%;transform:translateX(-50%);width:800px;height:800px;background:radial-gradient(circle,rgba(26,122,74,0.12) 0%,transparent 65%);pointer-events:none;}
+.hero-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--green);margin-bottom:20px;}
+.hero h1{font-family:'Playfair Display',serif;font-size:58px;font-weight:900;color:#fff;line-height:1.05;letter-spacing:-0.03em;max-width:820px;margin:0 auto 24px;}
+.hero h1 em{color:var(--green);font-style:italic;}
+.hero-sub{font-size:18px;color:rgba(255,255,255,0.55);max-width:600px;margin:0 auto 40px;line-height:1.7;font-weight:300;}
+.hero-cta{display:inline-block;background:var(--green);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;padding:16px 36px;border-radius:2px;text-decoration:none;transition:background 0.18s;}
+.hero-cta:hover{background:var(--green2);}
+.hero-proof{margin-top:48px;display:flex;justify-content:center;gap:48px;flex-wrap:wrap;}
+.hp{text-align:center;}
+.hp-num{font-family:'Playfair Display',serif;font-size:40px;font-weight:900;color:#fff;line-height:1;}
+.hp-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-top:6px;}
+
+/* ── DOR ── */
+.pain{max-width:860px;margin:80px auto;padding:0 48px;}
+.pain-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--red);margin-bottom:16px;display:flex;align-items:center;gap:12px;}
+.pain-eyebrow::after{content:'';flex:1;height:1px;background:var(--rule);}
+.pain h2{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;color:var(--ink);margin-bottom:24px;line-height:1.2;}
+.pain-list{list-style:none;display:grid;gap:12px;}
+.pain-list li{display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--red);border-radius:4px;padding:16px 20px;font-size:15px;line-height:1.6;}
+.pain-list li::before{content:'✗';color:var(--red);font-weight:900;font-family:'IBM Plex Mono',monospace;flex-shrink:0;margin-top:1px;}
+
+/* ── SOLUÇÃO ── */
+.solution{background:var(--ink);padding:80px 48px;}
+.solution-inner{max-width:860px;margin:0 auto;}
+.sol-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--green);margin-bottom:16px;}
+.solution h2{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;color:#fff;margin-bottom:24px;line-height:1.2;}
+.solution h2 em{color:var(--green);font-style:italic;}
+.sol-text{font-size:16px;color:rgba(255,255,255,0.6);line-height:1.8;margin-bottom:32px;}
+.sol-bullets{display:grid;gap:10px;}
+.sol-bullet{display:flex;align-items:flex-start;gap:14px;color:rgba(255,255,255,0.75);font-size:15px;line-height:1.6;}
+.sol-bullet::before{content:'✓';color:var(--green);font-weight:900;font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+
+/* ── PREVIEW ── */
+.preview{max-width:1100px;margin:80px auto;padding:0 48px;}
+.prev-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--green);margin-bottom:16px;display:flex;align-items:center;gap:12px;}
+.prev-eyebrow::after{content:'';flex:1;height:1px;background:var(--rule);}
+.preview h2{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;color:var(--ink);margin-bottom:8px;}
+.preview .sub{font-size:15px;color:var(--muted);margin-bottom:40px;}
+.preview-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px;}
+.prev-card{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:28px;transition:box-shadow 0.18s;}
+.prev-card:hover{box-shadow:0 8px 32px rgba(0,0,0,0.08);}
+.prev-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--ink);margin-bottom:4px;}
+.prev-desc{font-size:12px;color:var(--muted);margin-bottom:20px;}
+canvas{max-height:260px;}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:32px;}
+.stat-box{background:var(--ink);border-radius:6px;padding:24px;text-align:center;}
+.stat-num{font-family:'Playfair Display',serif;font-size:38px;font-weight:900;color:#fff;line-height:1;}
+.stat-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-top:8px;}
+
+/* ── URGÊNCIA ── */
+.urgency{background:linear-gradient(135deg,#1a3a1a,#0d2137);padding:60px 48px;text-align:center;}
+.urg-inner{max-width:720px;margin:0 auto;}
+.urg-tag{display:inline-block;background:var(--red);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;padding:5px 14px;border-radius:2px;margin-bottom:20px;}
+.urgency h2{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:#fff;margin-bottom:16px;line-height:1.25;}
+.urgency p{font-size:16px;color:rgba(255,255,255,0.55);line-height:1.7;margin-bottom:8px;}
+
+/* ── PLANOS ── */
+.plans-section{max-width:1060px;margin:80px auto;padding:0 48px;}
+.plans-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--green);margin-bottom:16px;display:flex;align-items:center;gap:12px;}
+.plans-eyebrow::after{content:'';flex:1;height:1px;background:var(--rule);}
+.plans-section h2{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;color:var(--ink);margin-bottom:8px;}
+.plans-sub{font-size:15px;color:var(--muted);margin-bottom:40px;}
+.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.plan-card{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:32px 28px;display:flex;flex-direction:column;transition:transform 0.18s,box-shadow 0.18s;}
+.plan-card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,0.1);}
+.plan-card.featured{border-color:var(--green);border-width:2px;position:relative;}
+.plan-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;padding:5px 16px;border-radius:20px;white-space:nowrap;}
+.plan-name{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.plan-card.featured .plan-name{color:var(--green);}
+.plan-price-big{font-family:'Playfair Display',serif;font-size:48px;font-weight:900;color:var(--ink);line-height:1;margin-bottom:4px;}
+.plan-price-big span{font-size:20px;font-weight:400;}
+.plan-period{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:24px;letter-spacing:0.04em;}
+.plan-divider{height:1px;background:var(--rule);margin-bottom:24px;}
+.plan-features{list-style:none;display:grid;gap:10px;margin-bottom:28px;flex:1;}
+.plan-features li{font-size:13px;color:var(--ink2);line-height:1.5;display:flex;align-items:flex-start;gap:10px;}
+.plan-features li::before{content:'✓';color:var(--green);font-weight:700;font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+.plan-features li.no::before{content:'—';color:var(--rule);}
+.plan-features li.no{color:var(--rule);}
+.plan-btn{display:block;text-align:center;background:var(--ink);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;padding:14px;border-radius:4px;text-decoration:none;transition:background 0.18s;border:none;cursor:pointer;}
+.plan-btn:hover{background:var(--ink2);}
+.plan-card.featured .plan-btn{background:var(--green);}
+.plan-card.featured .plan-btn:hover{background:var(--green2);}
+.plan-btn-free{background:transparent;border:1px solid var(--rule);color:var(--ink);}
+.plan-btn-free:hover{background:var(--paper2)!important;color:var(--ink)!important;}
+
+/* ── GARANTIA ── */
+.guarantee{max-width:720px;margin:60px auto;padding:0 48px;text-align:center;}
+.guar-box{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:40px;border-top:4px solid var(--green);}
+.guar-icon{font-size:48px;margin-bottom:16px;}
+.guar-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--ink);margin-bottom:12px;}
+.guar-text{font-size:15px;color:var(--muted);line-height:1.7;}
+
+/* ── FAQ ── */
+.faq{max-width:720px;margin:60px auto 80px;padding:0 48px;}
+.faq-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--green);margin-bottom:24px;display:flex;align-items:center;gap:12px;}
+.faq-eyebrow::after{content:'';flex:1;height:1px;background:var(--rule);}
+.faq-item{border-bottom:1px solid var(--rule);padding:20px 0;}
+.faq-q{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--ink);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;}
+.faq-q::after{content:'+';font-family:'IBM Plex Mono',monospace;font-size:18px;color:var(--green);flex-shrink:0;}
+.faq-item.open .faq-q::after{content:'−';}
+.faq-a{font-size:14px;color:var(--muted);line-height:1.8;margin-top:14px;display:none;}
+.faq-item.open .faq-a{display:block;}
+
+/* ── FOOTER ── */
+footer{background:var(--ink);padding:48px;text-align:center;}
+.foot-brand{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#fff;margin-bottom:8px;}
+.foot-brand em{color:var(--green);font-style:italic;}
+.foot-meta{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.25);}
+
+@media(max-width:768px){
+  .hero h1{font-size:36px;}
+  .plans-grid{grid-template-columns:1fr;}
+  .preview-grid{grid-template-columns:1fr;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .hero-proof{gap:28px;}
+  .mast-top,.mast-nav,.pain,.solution,.solution-inner,.preview,.plans-section,.faq,.guarantee{padding-left:24px;padding-right:24px;}
+}
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<div class="masthead">
+  <div class="mast-top">
+    <div>
+      <div class="mast-title"><a href="index.html" style="text-decoration:none;color:inherit">Epidemiologia <em>das Provas</em></a></div>
+      <div class="mast-kicker">Análise estratégica · Residência Médica · AMP-PR</div>
+    </div>
+  </div>
+  <div class="mast-nav">
+    <a href="index.html">Notícias</a>
+    <a href="index.html#editais">Editais</a>
+    <a href="planos.html" class="active">Planos</a>
+    <a href="index.html#membros">Área de Membros</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">AMP-PR · 1.000 questões analisadas</div>
+  <h1>Você sabe o que vai<br>cair na próxima<br><em>AMP-PR?</em></h1>
+  <p class="hero-sub">Enquanto seus colegas estudam tudo igualmente, você pode estudar o que realmente importa — com dados de 10 anos de prova.</p>
+  <a href="#planos" class="hero-cta">Ver os planos →</a>
+  <div class="hero-proof">
+    <div class="hp"><div class="hp-num">1.000</div><div class="hp-lbl">questões analisadas</div></div>
+    <div class="hp"><div class="hp-num">10</div><div class="hp-lbl">anos de prova</div></div>
+    <div class="hp"><div class="hp-num">47</div><div class="hp-lbl">temas mapeados</div></div>
+    <div class="hp"><div class="hp-num">5</div><div class="hp-lbl">grandes áreas</div></div>
+  </div>
+</div>
+
+<!-- DOR -->
+<div class="pain">
+  <div class="pain-eyebrow">O problema</div>
+  <h2>Estudar sem estratégia é o maior erro de quem presta residência</h2>
+  <ul class="pain-list">
+    <li>Você passa semanas em um tema que caiu 1 vez em 10 anos — e ignora outro que caiu em todas as edições.</li>
+    <li>Ninguém te disse que Cirurgia do Trauma caiu em <strong>todas as 10 últimas provas</strong> da AMP-PR — e foi o tema mais cobrado em 2026.</li>
+    <li>APS concentra 37% de todas as questões de Preventiva em 10 anos. Você sabia? A maioria não.</li>
+    <li>Sem saber os padrões, você distribui seu tempo de estudo de forma completamente errada.</li>
+  </ul>
+</div>
+
+<!-- SOLUÇÃO -->
+<div class="solution">
+  <div class="solution-inner">
+    <div class="sol-eyebrow">A solução</div>
+    <h2>Epidemiologia das Provas:<br><em>estude o que cai.</em></h2>
+    <p class="sol-text">Analisamos e classificamos as 1.000 questões das últimas 10 provas da AMP-PR por tema, subtema e assunto. Você vê exatamente onde a banca concentra as cobranças — e prioriza seu estudo com inteligência.</p>
+    <div class="sol-bullets">
+      <div class="sol-bullet">Classificação completa de 100 questões da AMP-PR 2026 — gratuita e disponível agora</div>
+      <div class="sol-bullet">Mapa interativo das últimas 5 provas (2022–2026) no Plano Essencial</div>
+      <div class="sol-bullet">Análise histórica completa de 10 anos (2017–2026) no Plano Premium</div>
+      <div class="sol-bullet">Gráficos por área, ranking de temas, alertas de tendências</div>
+      <div class="sol-bullet">Dados reais. Sem achismo. Sem opinião. Só o que a banca cobrou.</div>
+    </div>
+  </div>
+</div>
+
+<!-- PREVIEW DOS DADOS -->
+<div class="preview">
+  <div class="prev-eyebrow">Veja a análise</div>
+  <h2>Dados reais da AMP-PR 2026</h2>
+  <p class="sub">Preview da análise gratuita — 100 questões classificadas por tema e subtema.</p>
+
+  <div class="preview-grid">
+    <div class="prev-card">
+      <div class="prev-title">Temas mais cobrados — Cirurgia Geral</div>
+      <div class="prev-desc">Distribuição das 20 questões por tema (AMP-PR 2026)</div>
+      <canvas id="prevCG"></canvas>
+    </div>
+    <div class="prev-card">
+      <div class="prev-title">Temas mais cobrados — Medicina Preventiva</div>
+      <div class="prev-desc">Atenção Primária domina com 8 das 20 questões</div>
+      <canvas id="prevMP"></canvas>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-num">74</div><div class="stat-lbl">questões de APS em 10 anos</div></div>
+    <div class="stat-box"><div class="stat-num">39</div><div class="stat-lbl">questões de Infectologia Pediátrica</div></div>
+    <div class="stat-box"><div class="stat-num">10×</div><div class="stat-lbl">Cirurgia do Trauma caiu em todas as provas</div></div>
+    <div class="stat-box"><div class="stat-num">47</div><div class="stat-lbl">temas diferentes na prova 2026</div></div>
+  </div>
+</div>
+
+<!-- URGÊNCIA -->
+<div class="urgency">
+  <div class="urg-inner">
+    <div class="urg-tag">⚠️ Atenção — AMP-PR se aproxima</div>
+    <h2>A próxima prova vai cobrar os mesmos padrões.<br>A questão é: você vai estar preparado?</h2>
+    <p>Cardiologia lidera Clínica Médica <strong style="color:#fff">pelos últimos 3 anos consecutivos</strong>. Cirurgia do Trauma caiu em <strong style="color:#fff">todas as 10 edições</strong>. APS concentra <strong style="color:#fff">37% de toda a Preventiva</strong>.</p>
+    <p style="margin-top:12px">Esses dados não são segredo — mas estão aqui, organizados, para quem quiser usar.</p>
+  </div>
+</div>
+
+<!-- PLANOS -->
+<div class="plans-section" id="planos">
+  <div class="plans-eyebrow">Escolha seu plano</div>
+  <h2>Acesso completo aos dados da AMP-PR</h2>
+  <p class="plans-sub">Pagamento único. Sem mensalidade. Acesso imediato após a compra.</p>
+
+  <div class="plans-grid">
+
+    <!-- BÁSICO -->
+    <div class="plan-card">
+      <div class="plan-name">Plano Básico</div>
+      <div class="plan-price-big">Grátis</div>
+      <div class="plan-period">sem cartão · acesso imediato</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li>Análise completa AMP-PR 2026</li>
+        <li>100 questões classificadas por tema</li>
+        <li>Gráficos por área (5 especialidades)</li>
+        <li>6 insights exclusivos da prova 2026</li>
+        <li class="no">Provas 2022–2025</li>
+        <li class="no">Mapa interativo de tendências</li>
+        <li class="no">Análise histórica 10 anos</li>
+      </ul>
+      <a href="analiseamp2026.html" target="_blank" class="plan-btn plan-btn-free">Acessar grátis →</a>
+    </div>
+
+    <!-- ESSENCIAL -->
+    <div class="plan-card featured">
+      <div class="plan-badge">Mais popular</div>
+      <div class="plan-name">Plano Essencial</div>
+      <div class="plan-price-big"><span>R$</span> 87</div>
+      <div class="plan-period">pagamento único · acesso imediato</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li>Tudo do Plano Básico</li>
+        <li>Análise das 5 últimas provas (2022–2026)</li>
+        <li>500 questões classificadas e mapeadas</li>
+        <li>Mapa interativo com ranking de temas</li>
+        <li>Alertas de tendências por área</li>
+        <li>Evolução anual por tema</li>
+        <li class="no">Análise histórica 10 anos (2017–2026)</li>
+      </ul>
+      <a href="#" class="plan-btn" id="btnEssencial">Adquirir Essencial →</a>
+    </div>
+
+    <!-- PREMIUM -->
+    <div class="plan-card">
+      <div class="plan-name">Plano Premium</div>
+      <div class="plan-price-big"><span>R$</span> 147</div>
+      <div class="plan-period">pagamento único · acesso imediato</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li>Tudo do Plano Essencial</li>
+        <li>10 anos completos de análise (2017–2026)</li>
+        <li>1.000 questões classificadas e mapeadas</li>
+        <li>Visão histórica de longo prazo</li>
+        <li>Temas em ascensão e queda</li>
+        <li>Comparativo entre edições</li>
+        <li>Prioridade em atualizações futuras</li>
+      </ul>
+      <a href="#" class="plan-btn" id="btnPremium">Adquirir Premium →</a>
+    </div>
+
+  </div>
+</div>
+
+<!-- GARANTIA -->
+<div class="guarantee">
+  <div class="guar-box">
+    <div class="guar-icon">🛡️</div>
+    <div class="guar-title">Conteúdo baseado 100% em dados oficiais</div>
+    <p class="guar-text">Todas as classificações são feitas a partir das provas oficiais da AMP-PR. Nenhum achismo, nenhuma opinião — só o que a banca efetivamente cobrou, organizado para que você estude melhor.</p>
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="faq">
+  <div class="faq-eyebrow">Dúvidas frequentes</div>
+
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Posso acessar pelo celular?</div>
+    <div class="faq-a">Sim. O conteúdo é totalmente responsivo e funciona em qualquer dispositivo — celular, tablet ou computador. Recomendamos acesso com conexão à internet para garantir o carregamento dos gráficos.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Por quanto tempo tenho acesso?</div>
+    <div class="faq-a">O acesso é vitalício. Pagamento único, sem mensalidade. O conteúdo adquirido fica disponível na sua área de membros sem prazo de expiração.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">O conteúdo será atualizado com a prova de 2027?</div>
+    <div class="faq-a">Sim. Assim que a AMP-PR 2027 for realizada, faremos a análise e classificação das novas questões. Usuários dos planos Essencial e Premium recebem as atualizações sem custo adicional.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">A análise cobre todas as especialidades?</div>
+    <div class="faq-a">Sim. A AMP-PR é dividida em 5 grandes áreas com 20 questões cada: Pediatria, Ginecologia & Obstetrícia, Clínica Médica, Cirurgia Geral e Medicina Preventiva. Todas são cobertas na análise.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Qual a diferença entre Essencial e Premium?</div>
+    <div class="faq-a">O Essencial cobre as últimas 5 provas (2022–2026), com 500 questões. O Premium cobre 10 anos completos (2017–2026), com 1.000 questões — ideal para quem quer ver tendências de longo prazo e temas em ascensão ao longo da última década.</div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-brand">Epidemiologia <em>das Provas</em></div>
+  <div class="foot-meta" style="margin-top:8px">AMP-PR · ENAMED · ENARE · Análise estratégica · 2026</div>
+</footer>
+
+<script>
+// Gráficos preview
+Chart.defaults.color='#5a7a6a';
+Chart.defaults.font.family='Source Serif 4';
+
+function barH(id,labels,data,color){
+  const ctx=document.getElementById(id);
+  if(!ctx)return;
+  ctx.style.height=Math.max(140,labels.length*34)+'px';
+  new Chart(ctx,{type:'bar',data:{labels,datasets:[{data,backgroundColor:color,borderRadius:3,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.parsed.x} questão${c.parsed.x>1?'ões':''}`}}},
+      scales:{x:{grid:{color:'#e8f5ee'},ticks:{color:'#5a7a6a',stepSize:1},min:0},
+              y:{grid:{display:false},ticks:{color:'#0d2137',font:{size:12},autoSkip:false}}}}});
+}
+barH('prevCG',
+  ['Cirurgia do Trauma','Cuidados Pós-Op.','Medicina Intensiva','Cirurgia Hepatobiliar','Demais temas'],
+  [5,3,2,2,8],'#1a7a4a');
+barH('prevMP',
+  ['Atenção Primária à Saúde','Estudos Epidemiológicos','Níveis de Prevenção','Estat. Diagnósticos','Demais temas'],
+  [8,3,2,2,5],'#0d2137');
+
+// FAQ
+function toggleFaq(el){
+  var item=el.parentElement;
+  item.classList.toggle('open');
+}
+</script>
+</body>
+</html>
