@@ -245,6 +245,35 @@ footer{background:var(--ink);padding:48px;text-align:center;}
   </div>
 </div>
 
+<!-- RECURSOS -->
+<div class="preview" style="margin-bottom:40px">
+  <div class="prev-eyebrow">Recursos da plataforma</div>
+  <h2>Ferramentas que apontam onde focar</h2>
+  <p class="sub">Cada recurso foi pensado para transformar 10 anos de dados em decisões de estudo.</p>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px">
+    <div class="prev-card" style="border-left:3px solid var(--green)">
+      <div style="font-size:28px;margin-bottom:10px">🔥</div>
+      <div class="prev-title">Temas Quentes <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--green);border:1px solid var(--green);padding:2px 7px;border-radius:10px;margin-left:6px">Essencial + Premium</span></div>
+      <div class="prev-desc" style="margin-bottom:0">Temas cuja cobrança nas últimas 3 provas está <strong>acima da média histórica</strong>. São a sua prioridade de revisão — onde a banca está apostando agora.</div>
+    </div>
+    <div class="prev-card" style="border-left:3px solid #4a90d9">
+      <div style="font-size:28px;margin-bottom:10px">❄️</div>
+      <div class="prev-title">Temas Frios <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--green);border:1px solid var(--green);padding:2px 7px;border-radius:10px;margin-left:6px">Essencial + Premium</span></div>
+      <div class="prev-desc" style="margin-bottom:0">Temas que vêm sendo <strong>menos cobrados</strong> em relação ao histórico. Saiba o que pode ser despriorizado para ganhar tempo onde importa.</div>
+    </div>
+    <div class="prev-card" style="border-left:3px solid var(--gold)">
+      <div style="font-size:28px;margin-bottom:10px">📈</div>
+      <div class="prev-title">Evolução Temporal <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold);padding:2px 7px;border-radius:10px;margin-left:6px">Premium</span></div>
+      <div class="prev-desc" style="margin-bottom:0">Veja o número de questões de cada área <strong>ano a ano</strong> ao longo de 10 anos. Identifique tendências de longo prazo que uma única prova não revela.</div>
+    </div>
+    <div class="prev-card" style="border-left:3px solid var(--gold)">
+      <div style="font-size:28px;margin-bottom:10px">🏆</div>
+      <div class="prev-title">Top 5 Temas <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold);padding:2px 7px;border-radius:10px;margin-left:6px">Premium</span></div>
+      <div class="prev-desc" style="margin-bottom:0">Ranking dos <strong>5 temas mais cobrados nas últimas 3 provas</strong> de cada área. O atalho direto para o que mais cai — sem perder tempo.</div>
+    </div>
+  </div>
+</div>
+
 <!-- PLANOS -->
 <div class="plans-section" id="planos">
   <div class="plans-eyebrow">Escolha seu plano</div>
@@ -272,8 +301,7 @@ footer{background:var(--ink);padding:48px;text-align:center;}
     </div>
 
     <!-- ESSENCIAL -->
-    <div class="plan-card featured">
-      <div class="plan-badge">Mais popular</div>
+    <div class="plan-card">
       <div class="plan-name">Plano Essencial</div>
       <div class="plan-price-big"><span>R$</span> 87</div>
       <div class="plan-period">pagamento único · acesso imediato</div>
@@ -283,26 +311,30 @@ footer{background:var(--ink);padding:48px;text-align:center;}
         <li>Análise das 5 últimas provas (2022–2026)</li>
         <li>500 questões classificadas e mapeadas</li>
         <li>Mapa interativo com ranking de temas</li>
-        <li>Alertas de tendências por área</li>
-        <li>Evolução anual por tema</li>
+        <li>🔥 <strong>Temas Quentes</strong> — o que vem caindo mais</li>
+        <li>❄️ <strong>Temas Frios</strong> — o que vem caindo menos</li>
+        <li class="no">Evolução temporal por ano</li>
+        <li class="no">Top 5 temas das últimas provas</li>
         <li class="no">Análise histórica 10 anos (2017–2026)</li>
       </ul>
       <a href="#" class="plan-btn" id="btnEssencial">Adquirir Essencial →</a>
     </div>
 
     <!-- PREMIUM -->
-    <div class="plan-card">
+    <div class="plan-card featured">
+      <div class="plan-badge">⭐ Mais completo · Mais popular</div>
       <div class="plan-name">Plano Premium</div>
       <div class="plan-price-big"><span>R$</span> 147</div>
       <div class="plan-period">pagamento único · acesso imediato</div>
       <div class="plan-divider"></div>
       <ul class="plan-features">
         <li>Tudo do Plano Essencial</li>
+        <li>🔥 Temas Quentes e ❄️ Temas Frios</li>
         <li>10 anos completos de análise (2017–2026)</li>
         <li>1.000 questões classificadas e mapeadas</li>
-        <li>Visão histórica de longo prazo</li>
-        <li>Temas em ascensão e queda</li>
-        <li>Comparativo entre edições</li>
+        <li>📈 <strong>Evolução temporal</strong> — questões por ano em cada área</li>
+        <li>🏆 <strong>Top 5 temas</strong> das últimas 3 provas</li>
+        <li>Visão histórica de longo prazo e comparativo entre edições</li>
         <li>Prioridade em atualizações futuras</li>
       </ul>
       <a href="#" class="plan-btn" id="btnPremium">Adquirir Premium →</a>
@@ -342,7 +374,7 @@ footer{background:var(--ink);padding:48px;text-align:center;}
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="toggleFaq(this)">Qual a diferença entre Essencial e Premium?</div>
-    <div class="faq-a">O Essencial cobre as últimas 5 provas (2022–2026), com 500 questões. O Premium cobre 10 anos completos (2017–2026), com 1.000 questões — ideal para quem quer ver tendências de longo prazo e temas em ascensão ao longo da última década.</div>
+    <div class="faq-a">O Essencial cobre as últimas 5 provas (2022–2026), com 500 questões, e já inclui os recursos de Temas Quentes e Temas Frios. O Premium cobre 10 anos completos (2017–2026), com 1.000 questões, e adiciona dois recursos exclusivos: a <strong>Evolução Temporal</strong> (questões por ano em cada área) e o <strong>Top 5 temas das últimas 3 provas</strong> — ideal para quem quer a visão mais completa e estratégica possível.</div>
   </div>
 </div>
 

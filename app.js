@@ -87,7 +87,11 @@ function filterChip(el) {
 }
 
 // ── MODAL MAPA ──
-function openMapa() {
+function openMapa(src, titulo) {
+  var frame = document.getElementById('mapaFrame');
+  if (src && frame && frame.getAttribute('src') !== src) frame.setAttribute('src', src);
+  var t = document.querySelector('.modal-bar-title');
+  if (t && titulo) t.textContent = titulo;
   document.getElementById('mapaModal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -131,10 +135,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Mapa buttons
   var bm = document.getElementById('btnAbrirMapa');
-  if (bm) bm.addEventListener('click', openMapa);
+  if (bm) bm.addEventListener('click', function(){ openMapa('mapa-essencial.html', '🗺️ Mapa da Prova — AMP-PR (Essencial)'); });
+
+  var bmp = document.getElementById('btnAbrirMapaPremium');
+  if (bmp) bmp.addEventListener('click', function(){ openMapa('mapa-premium.html', '🏆 Mapa Premium — AMP-PR (10 anos)'); });
 
   var bma = document.getElementById('btnAbrirMapaAdmin');
-  if (bma) bma.addEventListener('click', openMapa);
+  if (bma) bma.addEventListener('click', function(){ openMapa('mapa-premium.html', '🏆 Mapa da Prova — visão admin (10 anos)'); });
 
   // Fechar modal com ESC
   document.addEventListener('keydown', function(e) {
