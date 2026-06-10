@@ -280,8 +280,10 @@ const AY = AMP_DATA.areaYear;
 const QT = AMP_DATA.questoesTema;
 const QS = AMP_DATA.questoesSubtema;
 let YRS = AMP_DATA.years.slice();
-const REC = ['2024','2025','2026'];
-const OLD = ['2017','2018','2019','2020','2021','2022','2023'];
+// REC/OLD derivados dinamicamente dos anos disponíveis no dataset
+const _yrsSorted = YRS.slice().sort();
+const REC = _yrsSorted.slice(-3);
+const OLD = _yrsSorted.slice(0, -3);
 
 let charts = {};
 Chart.defaults.color = '#5a6a88';
@@ -499,7 +501,7 @@ function updateAlerts(area){
   const temas=Object.keys(H[area]);
   const trends=temas.map(t=>{
     const rec=REC.reduce((s,y)=>s+(TS[area+'|||'+t]?.[y]||0),0)/REC.length;
-    const old=OLD.reduce((s,y)=>s+(TS[area+'|||'+t]?.[y]||0),0)/OLD.length;
+    const old=OLD.length?OLD.reduce((s,y)=>s+(TS[area+'|||'+t]?.[y]||0),0)/OLD.length:0;
     return {t,delta:rec-old};
   }).sort((a,b)=>b.delta-a.delta);
 
