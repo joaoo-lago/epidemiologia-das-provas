@@ -408,10 +408,7 @@ footer{background:var(--ink);padding:48px;text-align:center;}
 </div>
 
 <script>
-// ── CAPTURA DE LEAD ──
-// IMPORTANTE: troque FORM_ENDPOINT pelo seu endpoint do Formspree (formspree.io)
-var FORM_ENDPOINT = 'https://formspree.io/f/SEU_ID_AQUI';
-
+// ── CAPTURA DE LEAD — Formsubmit.co ──
 function openCapture(){
   document.getElementById('captureOverlay').style.display='flex';
   document.getElementById('captureForm').style.display='block';
@@ -428,24 +425,26 @@ function showSuccess(){
 }
 function submitLead(e){
   e.preventDefault();
-  var btn=document.getElementById('leadSubmit');
-  var form=document.getElementById('leadForm');
-  btn.textContent='Enviando...'; btn.disabled=true;
-
-  // Se o endpoint ainda não foi configurado, libera o acesso direto
-  if(FORM_ENDPOINT.indexOf('SEU_ID_AQUI')!==-1){
-    showSuccess(); return false;
-  }
-  fetch(FORM_ENDPOINT,{
-    method:'POST',
-    headers:{'Accept':'application/json'},
-    body:new FormData(form)
-  }).then(function(r){ showSuccess(); })
-    .catch(function(){ showSuccess(); }); // libera mesmo se a rede falhar
+  var btn = document.getElementById('leadSubmit');
+  var form = document.getElementById('leadForm');
+  btn.textContent = 'Enviando...';
+  btn.disabled = true;
+  fetch('https://formsubmit.co/ajax/jhmlago@gmail.com', {
+    method: 'POST',
+    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      nome:  form.querySelector('[name="nome"]').value,
+      email: form.querySelector('[name="email"]').value,
+      _subject: '🎓 Novo lead — Epidemiologia das Provas (Análise Gratuita)',
+      _template: 'table'
+    })
+  })
+  .then(function(){ showSuccess(); })
+  .catch(function(){ showSuccess(); }); // libera acesso mesmo se rede falhar
   return false;
 }
-document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeCapture(); });
-document.getElementById('captureOverlay').addEventListener('click',function(e){ if(e.target===this) closeCapture(); });
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeCapture(); });
+document.getElementById('captureOverlay').addEventListener('click', function(e){ if(e.target===this) closeCapture(); });
 </script>
 
 <script>
