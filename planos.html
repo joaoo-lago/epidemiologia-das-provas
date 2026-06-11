@@ -408,7 +408,13 @@ footer{background:var(--ink);padding:48px;text-align:center;}
 </div>
 
 <script>
-// ── CAPTURA DE LEAD — Formsubmit.co ──
+// ── CAPTURA DE LEAD — Google Forms ──
+// Cole aqui o ID do seu Google Form (a parte entre /d/ e /viewform na URL)
+var GOOGLE_FORM_ID = '';
+// IDs dos campos do Google Form (entry.XXXXXXXXX) — preencher após criar o form
+var FIELD_NOME  = 'entry.NOME_ID';
+var FIELD_EMAIL = 'entry.EMAIL_ID';
+
 function openCapture(){
   document.getElementById('captureOverlay').style.display='flex';
   document.getElementById('captureForm').style.display='block';
@@ -425,22 +431,26 @@ function showSuccess(){
 }
 function submitLead(e){
   e.preventDefault();
-  var btn = document.getElementById('leadSubmit');
-  var form = document.getElementById('leadForm');
+  var btn   = document.getElementById('leadSubmit');
+  var nome  = document.querySelector('#leadForm [name="nome"]').value;
+  var email = document.querySelector('#leadForm [name="email"]').value;
   btn.textContent = 'Enviando...';
   btn.disabled = true;
-  fetch('https://formsubmit.co/ajax/jhmlago@gmail.com', {
-    method: 'POST',
-    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      nome:  form.querySelector('[name="nome"]').value,
-      email: form.querySelector('[name="email"]').value,
-      _subject: '🎓 Novo lead — Epidemiologia das Provas (Análise Gratuita)',
-      _template: 'table'
-    })
-  })
-  .then(function(){ showSuccess(); })
-  .catch(function(){ showSuccess(); }); // libera acesso mesmo se rede falhar
+
+  if(!GOOGLE_FORM_ID){
+    // Form ainda não configurado — libera acesso direto
+    showSuccess(); return false;
+  }
+
+  var url = 'https://docs.google.com/forms/d/' + GOOGLE_FORM_ID + '/formResponse';
+  var body = new URLSearchParams();
+  body.append(FIELD_NOME,  nome);
+  body.append(FIELD_EMAIL, email);
+
+  // Google Forms não aceita CORS, então usamos no-cors (dados chegam na planilha mesmo assim)
+  fetch(url, { method:'POST', mode:'no-cors', body: body })
+    .finally(function(){ showSuccess(); });
+
   return false;
 }
 document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeCapture(); });
