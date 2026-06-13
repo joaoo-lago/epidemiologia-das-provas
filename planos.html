@@ -393,7 +393,33 @@ footer{background:var(--ink);padding:48px;text-align:center;}
       <p style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:24px">100 questões classificadas por tema, com gráficos por área. Informe seus dados e o acesso é liberado na hora.</p>
       <form id="leadForm" onsubmit="return submitLead(event)">
         <input name="nome" type="text" required placeholder="Seu nome" style="width:100%;border:1px solid var(--rule);border-radius:5px;padding:13px 15px;font-size:14px;font-family:'Source Serif 4',serif;margin-bottom:12px;color:var(--ink)">
-        <input name="email" type="email" required placeholder="Seu melhor e-mail" style="width:100%;border:1px solid var(--rule);border-radius:5px;padding:13px 15px;font-size:14px;font-family:'Source Serif 4',serif;margin-bottom:16px;color:var(--ink)">
+        <input name="email" type="email" required placeholder="Seu melhor e-mail" style="width:100%;border:1px solid var(--rule);border-radius:5px;padding:13px 15px;font-size:14px;font-family:'Source Serif 4',serif;margin-bottom:12px;color:var(--ink)">
+        <input name="faculdade" type="text" required placeholder="Sua faculdade" style="width:100%;border:1px solid var(--rule);border-radius:5px;padding:13px 15px;font-size:14px;font-family:'Source Serif 4',serif;margin-bottom:12px;color:var(--ink)">
+        <select name="ano" required style="width:100%;border:1px solid var(--rule);border-radius:5px;padding:13px 15px;font-size:14px;font-family:'Source Serif 4',serif;margin-bottom:12px;color:var(--ink);background:var(--surface);cursor:pointer">
+          <option value="" disabled selected>Ano de formação</option>
+          <option>Estudante — 1º ao 4º ano</option>
+          <option>Estudante — 5º ou 6º ano</option>
+          <option>Formado em 2026</option>
+          <option>Formado em 2025</option>
+          <option>Formado em 2024</option>
+          <option>Formado em 2023 ou antes</option>
+        </select>
+        <select name="especialidade" required style="width:100%;border:1px solid var(--rule);border-radius:5px;padding:13px 15px;font-size:14px;font-family:'Source Serif 4',serif;margin-bottom:16px;color:var(--ink);background:var(--surface);cursor:pointer">
+          <option value="" disabled selected>Especialidade pleiteada</option>
+          <option>Acesso Direto (ainda decidindo)</option>
+          <option>Clínica Médica</option>
+          <option>Cirurgia Geral</option>
+          <option>Pediatria</option>
+          <option>Ginecologia e Obstetrícia</option>
+          <option>Medicina de Família e Comunidade</option>
+          <option>Anestesiologia</option>
+          <option>Ortopedia e Traumatologia</option>
+          <option>Radiologia</option>
+          <option>Dermatologia</option>
+          <option>Psiquiatria</option>
+          <option>Oftalmologia</option>
+          <option>Outra</option>
+        </select>
         <button type="submit" id="leadSubmit" style="width:100%;background:var(--green);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;padding:15px;border:none;border-radius:5px;cursor:pointer;transition:background 0.18s">Liberar acesso gratuito →</button>
         <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:12px">Sem spam. Você pode cancelar quando quiser.</div>
       </form>
@@ -412,8 +438,11 @@ footer{background:var(--ink);padding:48px;text-align:center;}
 // Cole aqui o ID do seu Google Form (a parte entre /d/ e /viewform na URL)
 var GOOGLE_FORM_ID = '';
 // IDs dos campos do Google Form (entry.XXXXXXXXX) — preencher após criar o form
-var FIELD_NOME  = 'entry.NOME_ID';
-var FIELD_EMAIL = 'entry.EMAIL_ID';
+var FIELD_NOME          = 'entry.NOME_ID';
+var FIELD_EMAIL         = 'entry.EMAIL_ID';
+var FIELD_FACULDADE     = 'entry.FACULDADE_ID';
+var FIELD_ANO           = 'entry.ANO_ID';
+var FIELD_ESPECIALIDADE = 'entry.ESPECIALIDADE_ID';
 
 function openCapture(){
   document.getElementById('captureOverlay').style.display='flex';
@@ -431,9 +460,12 @@ function showSuccess(){
 }
 function submitLead(e){
   e.preventDefault();
-  var btn   = document.getElementById('leadSubmit');
-  var nome  = document.querySelector('#leadForm [name="nome"]').value;
-  var email = document.querySelector('#leadForm [name="email"]').value;
+  var btn           = document.getElementById('leadSubmit');
+  var nome          = document.querySelector('#leadForm [name="nome"]').value;
+  var email         = document.querySelector('#leadForm [name="email"]').value;
+  var faculdade     = document.querySelector('#leadForm [name="faculdade"]').value;
+  var ano           = document.querySelector('#leadForm [name="ano"]').value;
+  var especialidade = document.querySelector('#leadForm [name="especialidade"]').value;
   btn.textContent = 'Enviando...';
   btn.disabled = true;
 
@@ -444,8 +476,11 @@ function submitLead(e){
 
   var url = 'https://docs.google.com/forms/d/' + GOOGLE_FORM_ID + '/formResponse';
   var body = new URLSearchParams();
-  body.append(FIELD_NOME,  nome);
-  body.append(FIELD_EMAIL, email);
+  body.append(FIELD_NOME,          nome);
+  body.append(FIELD_EMAIL,         email);
+  body.append(FIELD_FACULDADE,     faculdade);
+  body.append(FIELD_ANO,           ano);
+  body.append(FIELD_ESPECIALIDADE, especialidade);
 
   // Google Forms não aceita CORS, então usamos no-cors (dados chegam na planilha mesmo assim)
   fetch(url, { method:'POST', mode:'no-cors', body: body })
