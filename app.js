@@ -59,16 +59,22 @@ function selectPlan(el, id) {
   if (!cta) return;
   cta.style.display = 'block';
   var msgs = {
-    basico:   { label: '📊 Acessar análise gratuita →', href: 'analiseamp2026.html', blank: true },
+    basico:   { label: '📊 Acessar análise gratuita →', capture: true },
     essencial:{ label: '⭐ Adquirir Plano Essencial — R$ 87 →', href: '#', blank: false },
     premium:  { label: '🏆 Adquirir Plano Premium — R$ 147 →', href: '#', blank: false }
   };
   var m = msgs[id];
   if (!m) return;
-  cta.innerHTML = '<a href="' + m.href + '"' + (m.blank ? ' target="_blank"' : '') +
-    ' style="display:block;background:var(--red);color:#fff;font-family:\'IBM Plex Mono\',monospace;' +
+  var style = 'display:block;background:var(--red);color:#fff;font-family:\'IBM Plex Mono\',monospace;' +
     'font-size:11px;letter-spacing:0.1em;text-transform:uppercase;padding:13px 18px;border-radius:2px;' +
-    'text-decoration:none;transition:background 0.15s">' + m.label + '</a>';
+    'text-decoration:none;transition:background 0.15s;cursor:pointer;border:none;width:100%;text-align:center';
+  if (m.capture) {
+    // Plano gratuito — exige cadastro no formulário antes de liberar o acesso
+    cta.innerHTML = '<button type="button" onclick="openCapture()" style="' + style + '">' + m.label + '</button>';
+  } else {
+    cta.innerHTML = '<a href="' + m.href + '"' + (m.blank ? ' target="_blank"' : '') +
+      ' style="' + style + '">' + m.label + '</a>';
+  }
 }
 
 // ── SELETOR DE PROVA ──
