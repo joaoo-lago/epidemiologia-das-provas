@@ -420,6 +420,7 @@ footer{background:var(--ink);padding:48px;text-align:center;}
           <option>Oftalmologia</option>
           <option>Outra</option>
         </select>
+        <input name="especialidadeOutra" type="text" placeholder="Qual especialidade?" style="display:none;width:100%;border:1px solid var(--rule);border-radius:5px;padding:13px 15px;font-size:14px;font-family:'Source Serif 4',serif;margin-bottom:16px;color:var(--ink)">
         <button type="submit" id="leadSubmit" style="width:100%;background:var(--green);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;padding:15px;border:none;border-radius:5px;cursor:pointer;transition:background 0.18s">Liberar acesso gratuito →</button>
         <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:12px">Sem spam. Você pode cancelar quando quiser.</div>
       </form>
@@ -436,13 +437,14 @@ footer{background:var(--ink);padding:48px;text-align:center;}
 <script>
 // ── CAPTURA DE LEAD — Google Forms ──
 // Cole aqui o ID do seu Google Form (a parte entre /d/ e /viewform na URL)
-var GOOGLE_FORM_ID = '';
-// IDs dos campos do Google Form (entry.XXXXXXXXX) — preencher após criar o form
-var FIELD_NOME          = 'entry.NOME_ID';
-var FIELD_EMAIL         = 'entry.EMAIL_ID';
-var FIELD_FACULDADE     = 'entry.FACULDADE_ID';
-var FIELD_ANO           = 'entry.ANO_ID';
-var FIELD_ESPECIALIDADE = 'entry.ESPECIALIDADE_ID';
+var GOOGLE_FORM_ID = '1FAIpQLSfxSvvpU8ZwqmaTeObjGIHo4ibZDGZ11yYhPp-EEKueyQgMeg';
+// IDs dos campos do Google Form (entry.XXXXXXXXX)
+var FIELD_NOME          = 'entry.1980981924';
+var FIELD_EMAIL         = 'entry.1362758454';
+var FIELD_FACULDADE     = 'entry.1521573877';
+var FIELD_ANO           = 'entry.1455415375';
+var FIELD_ESPECIALIDADE = 'entry.539291083';
+var FIELD_ESPEC_OUTRA   = 'entry.1080969703';
 
 function openCapture(){
   document.getElementById('captureOverlay').style.display='flex';
@@ -466,6 +468,7 @@ function submitLead(e){
   var faculdade     = document.querySelector('#leadForm [name="faculdade"]').value;
   var ano           = document.querySelector('#leadForm [name="ano"]').value;
   var especialidade = document.querySelector('#leadForm [name="especialidade"]').value;
+  var especOutra    = document.querySelector('#leadForm [name="especialidadeOutra"]').value;
   btn.textContent = 'Enviando...';
   btn.disabled = true;
 
@@ -474,13 +477,14 @@ function submitLead(e){
     showSuccess(); return false;
   }
 
-  var url = 'https://docs.google.com/forms/d/' + GOOGLE_FORM_ID + '/formResponse';
+  var url = 'https://docs.google.com/forms/d/e/' + GOOGLE_FORM_ID + '/formResponse';
   var body = new URLSearchParams();
   body.append(FIELD_NOME,          nome);
   body.append(FIELD_EMAIL,         email);
   body.append(FIELD_FACULDADE,     faculdade);
   body.append(FIELD_ANO,           ano);
   body.append(FIELD_ESPECIALIDADE, especialidade);
+  if(especialidade === 'Outra' && especOutra) body.append(FIELD_ESPEC_OUTRA, especOutra);
 
   // Google Forms não aceita CORS, então usamos no-cors (dados chegam na planilha mesmo assim)
   fetch(url, { method:'POST', mode:'no-cors', body: body })
@@ -488,6 +492,15 @@ function submitLead(e){
 
   return false;
 }
+// Mostra campo de texto quando "Outra" especialidade é selecionada
+(function(){
+  var sel = document.querySelector('#leadForm [name="especialidade"]');
+  var outra = document.querySelector('#leadForm [name="especialidadeOutra"]');
+  if(sel && outra) sel.addEventListener('change', function(){
+    outra.style.display = sel.value === 'Outra' ? 'block' : 'none';
+    if(sel.value !== 'Outra') outra.value = '';
+  });
+})();
 document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeCapture(); });
 document.getElementById('captureOverlay').addEventListener('click', function(e){ if(e.target===this) closeCapture(); });
 </script>
